@@ -25,7 +25,7 @@ jQuery(document).ready(function($) {
             companyField.show();
             shortDescField.hide();
             $('#product_service').prop('required', false);
-        } else if (userType === 'expanse') {
+        } else if (userType === 'expender') {
             serviceField.hide();
             panelKwField.hide();
             proposalField.hide();
@@ -64,7 +64,7 @@ jQuery(document).ready(function($) {
         } else if (clientType === 'seller') {
             sellerForm.show();
             submitContainer.show();
-        } else if (clientType === 'expanse') {
+        } else if (clientType === 'expender') {
             expanseForm.show();
             submitContainer.show();
         }
