@@ -25,7 +25,7 @@ function jtsm_render_view_client_page() {
     // Fetch payment data for this client
     $payments = $wpdb->get_results($wpdb->prepare("SELECT * FROM $payments_table WHERE client_id = %d ORDER BY payment_date DESC", $client_id));
 
-    // Calculate total paid amount
+    // Calculate total paid amount and remaining balance
     $total_paid = 0;
     if ($payments) {
         foreach ($payments as $payment) {
@@ -33,6 +33,8 @@ function jtsm_render_view_client_page() {
             $total_paid += floatval($amount);
         }
     }
+    $proposal_amount = floatval($client->proposal_amount);
+    $total_remaining = $proposal_amount - $total_paid;
     ?>
     <div class="wrap bg-gray-100 p-6">
         <!-- Header -->
@@ -95,10 +97,20 @@ function jtsm_render_view_client_page() {
                     <?php endif; ?>
                 </div>
             </div>
-            <!-- Total Paid Card -->
-            <div class="bg-white p-6 rounded-lg shadow-md flex flex-col items-center justify-center text-center">
-                 <h2 class="text-xl font-semibold text-gray-800 mb-2">Total Amount Paid</h2>
-                 <p class="text-4xl font-bold text-indigo-600"><?php echo number_format($total_paid, 2); ?></p>
+            <!-- Summary Cards -->
+            <div class="flex flex-col gap-4">
+                <div class="bg-white p-6 rounded-lg shadow-md flex flex-col items-center justify-center text-center">
+                    <h2 class="text-xl font-semibold text-gray-800 mb-2">Proposal Amount</h2>
+                    <p class="text-3xl font-bold text-indigo-600"><?php echo number_format($proposal_amount, 2); ?></p>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-md flex flex-col items-center justify-center text-center">
+                    <h2 class="text-xl font-semibold text-gray-800 mb-2">Total Amount Paid</h2>
+                    <p class="text-3xl font-bold text-indigo-600"><?php echo number_format($total_paid, 2); ?></p>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-md flex flex-col items-center justify-center text-center">
+                    <h2 class="text-xl font-semibold text-gray-800 mb-2">Total Remaining</h2>
+                    <p class="text-3xl font-bold text-indigo-600"><?php echo number_format($total_remaining, 2); ?></p>
+                </div>
             </div>
         </div>
 
