@@ -31,7 +31,7 @@ class JTSM_Solar_Management_CRUD {
                     <?php wp_nonce_field( 'jtsm_add_client_action', 'jtsm_add_client_nonce' ); ?>
                     <div class="grid grid-cols-6 md:grid-cols-6 gap-6">
 
-                    <div class="md:col-span-2"><label for="jtsm_user_type" class="block text-sm font-medium text-gray-700">Type of User</label><select name="jtsm_user_type" id="jtsm_user_type" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"><option value="consumer">Consumer</option><option value="seller">Seller</option></select></div>
+                    <div class="md:col-span-2"><label for="jtsm_user_type" class="block text-sm font-medium text-gray-700">Type of User</label><select name="jtsm_user_type" id="jtsm_user_type" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"><option value="consumer">Consumer</option><option value="seller">Seller</option><option value="expanse">Expanse</option></select></div>
 
                     <div class="md:col-span-4"><label for="jtsm_company_name" class="jtsm-seller block text-sm font-medium text-gray-700">Company Name</label><input type="text" name="jtsm_company_name" id="jtsm_company_name" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"></div>
 
@@ -45,6 +45,8 @@ class JTSM_Solar_Management_CRUD {
 
 
                         <div class="md:col-span-3"><label for="jtsm_contact_number" class="block text-sm font-medium text-gray-700">Contact Number</label><input type="text" name="jtsm_contact_number" id="jtsm_contact_number" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"></div>
+
+                        <div class="md:col-span-3 jtsm-expanse"><label for="jtsm_short_description" class="block text-sm font-medium text-gray-700">Short Description</label><textarea name="jtsm_short_description" id="jtsm_short_description" class="h-24 mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"></textarea></div>
 
 
                         <div class="md:col-span-2">
@@ -91,6 +93,7 @@ class JTSM_Solar_Management_CRUD {
             'last_name' => sanitize_text_field($_POST['jtsm_last_name']),
             'company_name' => sanitize_text_field($_POST['jtsm_company_name']),
             'contact_number' => sanitize_text_field($_POST['jtsm_contact_number']),
+            'short_description' => sanitize_textarea_field($_POST['jtsm_short_description']),
             'product_service' => sanitize_text_field($_POST['product_service']),
             'product_kw' => sanitize_text_field($_POST['product_kw']),
             'proposal_amount' => floatval($_POST['proposal_amount']),
@@ -158,6 +161,7 @@ class JTSM_Solar_Management_CRUD {
                             <select name="jtsm_user_type" id="jtsm_user_type" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
                                 <option value="consumer" <?php selected( $client->user_type, 'consumer' ); ?>>Consumer</option>
                                 <option value="seller" <?php selected( $client->user_type, 'seller' ); ?>>Seller</option>
+                                <option value="expanse" <?php selected( $client->user_type, 'expanse' ); ?>>Expanse</option>
                             </select>
                         </div>
 
@@ -184,6 +188,11 @@ class JTSM_Solar_Management_CRUD {
                         <div class="md:col-span-3">
                             <label for="jtsm_contact_number" class="block text-sm font-medium text-gray-700">Contact Number</label>
                             <input type="text" name="jtsm_contact_number" id="jtsm_contact_number" value="<?php echo esc_attr( $client->contact_number ); ?>" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
+                        </div>
+
+                        <div class="md:col-span-3 jtsm-expanse">
+                            <label for="jtsm_short_description" class="block text-sm font-medium text-gray-700">Short Description</label>
+                            <textarea name="jtsm_short_description" id="jtsm_short_description" class="h-24 mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"><?php echo esc_textarea( $client->short_description ); ?></textarea>
                         </div>
 
                         <div class="md:col-span-2">
@@ -235,6 +244,7 @@ class JTSM_Solar_Management_CRUD {
             'last_name'       => sanitize_text_field( $_POST['jtsm_last_name'] ),
             'company_name'    => sanitize_text_field( $_POST['jtsm_company_name'] ),
             'contact_number'  => sanitize_text_field( $_POST['jtsm_contact_number'] ),
+            'short_description' => sanitize_textarea_field( $_POST['jtsm_short_description'] ),
             'product_service' => sanitize_text_field( $_POST['product_service'] ),
             'product_kw'      => sanitize_text_field( $_POST['product_kw'] ),
             'proposal_amount' => floatval( $_POST['proposal_amount'] ),
@@ -317,6 +327,15 @@ class JTSM_Solar_Management_CRUD {
                         <div><label for="jtsm_payment_date_seller" class="block text-sm font-medium text-gray-700">Payment Date</label><input type="date" name="jtsm_payment_date_seller" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm"></div>
                     </div>
 
+                    <div id="jtsm-expanse-form" class="hidden space-y-4">
+                        <h2 class="text-lg font-medium text-gray-900 border-b pb-2">Expanse Payment</h2>
+                        <div><label for="jtsm_expanse_service" class="block text-sm font-medium text-gray-700">Service</label><input type="text" name="jtsm_expanse_service" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm"></div>
+                        <div><label for="jtsm_expanse_amount" class="block text-sm font-medium text-gray-700">Amount</label><input type="number" step="0.01" name="jtsm_expanse_amount" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm"></div>
+                        <div><label for="jtsm_payment_mode_expanse" class="block text-sm font-medium text-gray-700">Payment Mode</label><select name="jtsm_payment_mode_expanse" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm"><option value="upi">UPI</option><option value="cash">Cash</option><option value="netbanking">Net Banking</option><option value="other">Other</option></select></div>
+                        <div><label for="jtsm_payment_type_expanse" class="block text-sm font-medium text-gray-700">Payment Type</label><select name="jtsm_payment_type_expanse" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm"><option value="receiver">Receiver</option><option value="sender">Sender</option></select></div>
+                        <div><label for="jtsm_payment_date_expanse" class="block text-sm font-medium text-gray-700">Payment Date</label><input type="date" name="jtsm_payment_date_expanse" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm"></div>
+                    </div>
+
                     <div id="jtsm-submit-button-container" class="mt-6 hidden">
                         <?php submit_button('Add Payment', 'primary', 'submit', true, ['class' => 'inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500']); ?>
                     </div>
@@ -350,11 +369,7 @@ class JTSM_Solar_Management_CRUD {
             $data['payment_mode'] = sanitize_text_field($_POST['jtsm_payment_mode_consumer']);
             $data['payment_receive'] = sanitize_text_field($_POST['jtsm_payment_receive_consumer']);
             $data['payment_date'] = sanitize_text_field($_POST['jtsm_payment_date_consumer']);
-
-
-            
-            $data['payment_date'] = sanitize_text_field($_POST['jtsm_payment_date_consumer']);
-        } else { // Seller
+        } elseif ($client->user_type === 'seller') {
             $data['amount_without_gst'] = floatval($_POST['jtsm_amount_without_gst']);
             $data['gst_rate'] = intval($_POST['jtsm_gst_rate']);
             $data['amount_with_gst'] = floatval($_POST['jtsm_amount_with_gst']);
@@ -371,6 +386,12 @@ class JTSM_Solar_Management_CRUD {
                     $data['invoice_url'] = $movefile['url'];
                 }
             }
+        } else { // Expanse
+            $data['expense_service'] = sanitize_text_field($_POST['jtsm_expanse_service']);
+            $data['amount'] = floatval($_POST['jtsm_expanse_amount']);
+            $data['payment_mode'] = sanitize_text_field($_POST['jtsm_payment_mode_expanse']);
+            $data['payment_type'] = sanitize_text_field($_POST['jtsm_payment_type_expanse']);
+            $data['payment_date'] = sanitize_text_field($_POST['jtsm_payment_date_expanse']);
         }
 
         $result = $wpdb->insert($table_name, $data);
