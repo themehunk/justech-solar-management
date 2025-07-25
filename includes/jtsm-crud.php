@@ -121,6 +121,150 @@ class JTSM_Solar_Management_CRUD {
         }
     }
 
+    /**
+     * Render the page to edit an existing client.
+     */
+    public function jtsm_render_edit_client_page() {
+        if ( ! isset( $_GET['client_id'] ) ) {
+            echo '<div class="wrap"><div class="notice notice-error"><p>No client specified.</p></div></div>';
+            return;
+        }
+
+        global $wpdb;
+        $client_id  = intval( $_GET['client_id'] );
+        $table_name = $wpdb->prefix . 'jtsm_clients';
+        $client     = $wpdb->get_row( $wpdb->prepare( "SELECT * FROM $table_name WHERE id = %d", $client_id ) );
+
+        if ( ! $client ) {
+            echo '<div class="wrap"><div class="notice notice-error"><p>Client not found.</p></div></div>';
+            return;
+        }
+
+        if ( 'POST' === $_SERVER['REQUEST_METHOD'] && isset( $_POST['jtsm_edit_client_nonce'] ) && wp_verify_nonce( $_POST['jtsm_edit_client_nonce'], 'jtsm_edit_client_action' ) ) {
+            $this->jtsm_update_client_data( $client_id, $client );
+            $client = $wpdb->get_row( $wpdb->prepare( "SELECT * FROM $table_name WHERE id = %d", $client_id ) );
+        }
+
+        ?>
+        <div class="wrap bg-gray-100 p-6">
+            <h1 class="text-2xl font-semibold text-gray-800 mb-4"><?php _e('Edit Client', 'jtsm'); ?></h1>
+            <div class="bg-white p-6 rounded-lg shadow-md">
+                <form method="POST" enctype="multipart/form-data">
+                    <?php wp_nonce_field( 'jtsm_edit_client_action', 'jtsm_edit_client_nonce' ); ?>
+                    <div class="grid grid-cols-6 md:grid-cols-6 gap-6">
+
+                        <div class="md:col-span-2">
+                            <label for="jtsm_user_type" class="block text-sm font-medium text-gray-700">Type of User</label>
+                            <select name="jtsm_user_type" id="jtsm_user_type" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
+                                <option value="consumer" <?php selected( $client->user_type, 'consumer' ); ?>>Consumer</option>
+                                <option value="seller" <?php selected( $client->user_type, 'seller' ); ?>>Seller</option>
+                            </select>
+                        </div>
+
+                        <div class="md:col-span-4">
+                            <label for="jtsm_company_name" class="jtsm-seller block text-sm font-medium text-gray-700">Company Name</label>
+                            <input type="text" name="jtsm_company_name" id="jtsm_company_name" value="<?php echo esc_attr( $client->company_name ); ?>" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
+                        </div>
+
+                        <div class="md:col-span-3">
+                            <label for="jtsm_first_name" class="block text-sm font-medium text-gray-700">First Name</label>
+                            <input type="text" name="jtsm_first_name" id="jtsm_first_name" value="<?php echo esc_attr( $client->first_name ); ?>" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
+                        </div>
+
+                        <div class="md:col-span-3">
+                            <label for="jtsm_last_name" class="block text-sm font-medium text-gray-700">Last Name</label>
+                            <input type="text" name="jtsm_last_name" id="jtsm_last_name" value="<?php echo esc_attr( $client->last_name ); ?>" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
+                        </div>
+
+                        <div class="md:col-span-3">
+                            <label for="jtsm_email" class="block text-sm font-medium text-gray-700">Email</label>
+                            <input type="email" name="jtsm_email" id="jtsm_email" value="<?php echo esc_attr( $client->email ); ?>" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
+                        </div>
+
+                        <div class="md:col-span-3">
+                            <label for="jtsm_contact_number" class="block text-sm font-medium text-gray-700">Contact Number</label>
+                            <input type="text" name="jtsm_contact_number" id="jtsm_contact_number" value="<?php echo esc_attr( $client->contact_number ); ?>" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
+                        </div>
+
+                        <div class="md:col-span-2">
+                            <label for="product_service" class="block text-sm font-medium text-gray-700">Service Name</label>
+                            <input type="text" name="product_service" id="product_service" value="<?php echo esc_attr( $client->product_service ); ?>" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
+                        </div>
+
+                        <div class="md:col-span-2">
+                            <label for="product_kw" class="block text-sm font-medium text-gray-700">Panel K/W</label>
+                            <input type="text" name="product_kw" id="product_kw" value="<?php echo esc_attr( $client->product_kw ); ?>" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
+                        </div>
+
+                        <div class="md:col-span-2">
+                            <label for="proposal_amount" class="block text-sm font-medium text-gray-700">Proposal Amount</label>
+                            <input type="text" name="proposal_amount" id="proposal_amount" value="<?php echo esc_attr( $client->proposal_amount ); ?>" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
+                        </div>
+
+                        <div class="md:col-span-3">
+                            <label for="jtsm_address" class="block text-sm font-medium text-gray-700">Address</label>
+                            <textarea name="jtsm_address" id="jtsm_address" class="h-24 mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"><?php echo esc_textarea( $client->address ); ?></textarea>
+                        </div>
+
+                        <div class="md:col-span-3">
+                            <label for="jtsm_file_upload" class="block text-sm font-medium text-gray-700">File Upload</label>
+                            <input type="file" name="jtsm_file_upload" id="jtsm_file_upload" class="mt-1 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-600 hover:file:bg-indigo-100">
+                            <?php if ( $client->file_url ) : ?>
+                                <p class="mt-2 text-sm"><a href="<?php echo esc_url( $client->file_url ); ?>" target="_blank" class="text-indigo-600 hover:underline">View Current File</a></p>
+                            <?php endif; ?>
+                        </div>
+                    </div>
+                    <div class="mt-6">
+                        <?php submit_button( 'Update Client', 'primary', 'submit', true, [ 'class' => 'inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500' ] ); ?>
+                    </div>
+                </form>
+            </div>
+        </div>
+        <?php
+    }
+
+    /**
+     * Update client data in the custom table.
+     */
+    private function jtsm_update_client_data( $client_id, $client ) {
+        global $wpdb;
+        $table_name = $wpdb->prefix . 'jtsm_clients';
+
+        $data = [
+            'first_name'      => sanitize_text_field( $_POST['jtsm_first_name'] ),
+            'last_name'       => sanitize_text_field( $_POST['jtsm_last_name'] ),
+            'company_name'    => sanitize_text_field( $_POST['jtsm_company_name'] ),
+            'contact_number'  => sanitize_text_field( $_POST['jtsm_contact_number'] ),
+            'product_service' => sanitize_text_field( $_POST['product_service'] ),
+            'product_kw'      => sanitize_text_field( $_POST['product_kw'] ),
+            'proposal_amount' => floatval( $_POST['proposal_amount'] ),
+            'email'           => sanitize_email( $_POST['jtsm_email'] ),
+            'address'         => sanitize_textarea_field( $_POST['jtsm_address'] ),
+            'user_type'       => sanitize_text_field( $_POST['jtsm_user_type'] ),
+        ];
+
+        if ( ! empty( $_FILES['jtsm_file_upload']['name'] ) ) {
+            if ( ! function_exists( 'wp_handle_upload' ) ) {
+                require_once ABSPATH . 'wp-admin/includes/file.php';
+            }
+            $uploadedfile     = $_FILES['jtsm_file_upload'];
+            $upload_overrides = [ 'test_form' => false ];
+            $movefile         = wp_handle_upload( $uploadedfile, $upload_overrides );
+
+            if ( $movefile && ! isset( $movefile['error'] ) ) {
+                $data['file_url'] = $movefile['url'];
+            }
+        }
+
+        $result = $wpdb->update( $table_name, $data, [ 'id' => $client_id ] );
+
+        if ( false !== $result ) {
+            echo '<div class="notice notice-success is-dismissible"><p>Client updated successfully!</p></div>';
+        } else {
+            echo '<div class="notice notice-error is-dismissible"><p>There was an error updating the client.</p></div>';
+        }
+    }
+
 
      /**
      * Render the page to add a new payment.
