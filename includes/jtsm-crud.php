@@ -285,7 +285,11 @@ class JTSM_Solar_Management_CRUD {
         }
 
         global $wpdb;
-        $clients = $wpdb->get_results("SELECT id, first_name, last_name, user_type FROM {$wpdb->prefix}jtsm_clients ORDER BY user_type, first_name ASC");
+        $clients = $wpdb->get_results(
+            "SELECT id, first_name, last_name, user_type
+             FROM {$wpdb->prefix}jtsm_clients
+             ORDER BY FIELD(user_type, 'expender','consumer','seller'), first_name ASC"
+        );
         ?>
         <div class="wrap bg-gray-100 p-6">
             <h1 class="text-2xl font-semibold text-gray-800 mb-4"><?php _e('Add New Payment', 'jtsm'); ?></h1>
@@ -298,7 +302,7 @@ class JTSM_Solar_Management_CRUD {
                         <select name="jtsm_client_id" id="jtsm_client_id" required class="mt-1 block w-full md:w-1/2 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
                             <option value="">-- Select --</option>
                             <?php
-                            $grouped = [ 'consumer' => [], 'seller' => [], 'expender' => [] ];
+                            $grouped = [ 'expender' => [], 'consumer' => [], 'seller' => [] ];
                             foreach ( $clients as $client ) {
                                 $grouped[ $client->user_type ][] = $client;
                             }
@@ -343,7 +347,21 @@ class JTSM_Solar_Management_CRUD {
                         <div><label for="jtsm_expanse_service" class="block text-sm font-medium text-gray-700">Service</label><input type="text" name="jtsm_expanse_service" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm"></div>
                         <div><label for="jtsm_expanse_amount" class="block text-sm font-medium text-gray-700">Amount</label><input type="number" step="0.01" name="jtsm_expanse_amount" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm"></div>
                         <div><label for="jtsm_payment_mode_expanse" class="block text-sm font-medium text-gray-700">Payment Mode</label><select name="jtsm_payment_mode_expanse" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm"><option value="upi">UPI</option><option value="cash">Cash</option><option value="netbanking">Net Banking</option><option value="other">Other</option></select></div>
-                        <div><label for="jtsm_payment_type_expanse" class="block text-sm font-medium text-gray-700">Payment Type</label><select name="jtsm_payment_type_expanse" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm"><option value="receiver">Receiver</option><option value="sender">Sender</option></select></div>
+                        <div><label for="jtsm_payment_type_expanse" class="block text-sm font-medium text-gray-700">Payment Type</label><select id="jtsm_payment_type_expanse" name="jtsm_payment_type_expanse" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm"><option value="receiver">Receiver</option><option value="sender">Sender</option></select></div>
+                        <div id="jtsm-other-client-container" class="hidden">
+                            <label for="jtsm_other_client_id" class="block text-sm font-medium text-gray-700">Select Other Client</label>
+                            <select name="jtsm_other_client_id" id="jtsm_other_client_id" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm">
+                                <option value="">-- Select Client --</option>
+                                <?php foreach ( $grouped as $type => $items ) : ?>
+                                    <?php if ( ! $items ) continue; ?>
+                                    <optgroup label="<?php echo ucfirst( esc_html( $type ) ); ?>">
+                                        <?php foreach ( $items as $c ) : ?>
+                                            <option value="<?php echo esc_attr( $c->id ); ?>"><?php echo esc_html( $c->first_name . ' ' . $c->last_name ); ?></option>
+                                        <?php endforeach; ?>
+                                    </optgroup>
+                                <?php endforeach; ?>
+                            </select>
+                        </div>
                         <div><label for="jtsm_payment_date_expanse" class="block text-sm font-medium text-gray-700">Payment Date</label><input type="date" name="jtsm_payment_date_expanse" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm"></div>
                     </div>
 
@@ -403,6 +421,9 @@ class JTSM_Solar_Management_CRUD {
             $data['payment_mode'] = sanitize_text_field($_POST['jtsm_payment_mode_expanse']);
             $data['payment_type'] = sanitize_text_field($_POST['jtsm_payment_type_expanse']);
             $data['payment_date'] = sanitize_text_field($_POST['jtsm_payment_date_expanse']);
+            if ( isset( $_POST['jtsm_other_client_id'] ) && $_POST['jtsm_payment_type_expanse'] === 'sender' ) {
+                $data['other_client_id'] = intval( $_POST['jtsm_other_client_id'] );
+            }
         }
 
         $result = $wpdb->insert($table_name, $data);

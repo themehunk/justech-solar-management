@@ -120,7 +120,12 @@ class JTSM_Solar_Management_List_View {
         $payments_table = $wpdb->prefix . 'jtsm_payments';
 
 
-        $sql = "SELECT p.*, c.first_name, c.last_name, c.user_type FROM $payments_table p LEFT JOIN $clients_table c ON p.client_id = c.id";
+        $sql = "SELECT p.*, c.first_name, c.last_name, c.user_type,
+                       oc.first_name AS other_first_name,
+                       oc.last_name AS other_last_name
+                FROM $payments_table p
+                LEFT JOIN $clients_table c ON p.client_id = c.id
+                LEFT JOIN $clients_table oc ON p.other_client_id = oc.id";
 
         // Add a WHERE clause if a filter is selected
         if ($filter === 'consumer' || $filter === 'seller' || $filter === 'expender') {
@@ -281,7 +286,11 @@ class JTSM_Solar_Management_List_View {
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                 <?php
                                     if ($payment->user_type === 'expender') {
-                                        echo ucfirst(esc_html($payment->payment_type));
+                                        $label = ucfirst(esc_html($payment->payment_type));
+                                        if ($payment->payment_type === 'sender' && $payment->other_first_name) {
+                                            $label .= ' to ' . esc_html($payment->other_first_name . ' ' . $payment->other_last_name);
+                                        }
+                                        echo $label;
                                     } else {
                                         echo ucfirst(esc_html($payment->payment_receive));
                                     }
