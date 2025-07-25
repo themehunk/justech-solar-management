@@ -102,6 +102,7 @@ final class JTSM_Solar_Management_Setup {
             invoice_url varchar(255),
             expense_service text,
             payment_type varchar(20),
+            other_client_id mediumint(9),
             created_at datetime DEFAULT CURRENT_TIMESTAMP NOT NULL,
             PRIMARY KEY  (id)
         ) $charset_collate;";

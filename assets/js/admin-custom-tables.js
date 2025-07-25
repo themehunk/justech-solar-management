@@ -8,6 +8,8 @@ jQuery(document).ready(function($) {
     const sellerForm = $('#jtsm-seller-form');
     const expanseForm = $('#jtsm-expanse-form');
     const submitContainer = $('#jtsm-submit-button-container');
+    const paymentTypeField = $('#jtsm_payment_type_expanse');
+    const otherClientContainer = $('#jtsm-other-client-container');
 
     // --- Add Client Form Logic ---
     const userTypeField = $('#jtsm_user_type');
@@ -128,5 +130,20 @@ jQuery(document).ready(function($) {
     // Add event listeners to calculate GST automatically
     amountWithoutGstField.on('input', calculateGst);
     gstRateField.on('change', calculateGst);
+
+    function toggleOtherClientField(val) {
+        if (val === 'sender') {
+            otherClientContainer.show();
+        } else {
+            otherClientContainer.hide();
+        }
+    }
+
+    if (paymentTypeField.length) {
+        toggleOtherClientField(paymentTypeField.val());
+        paymentTypeField.on('change', function () {
+            toggleOtherClientField($(this).val());
+        });
+    }
 
 });
