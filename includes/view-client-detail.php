@@ -69,6 +69,24 @@ function jtsm_render_view_client_page() {
                         <p class="font-medium text-gray-500">Address</p>
                         <p class="text-gray-900"><?php echo nl2br(esc_html($client->address)) ?: 'N/A'; ?></p>
                     </div>
+                    <?php if ($client->service_name): ?>
+                    <div>
+                        <p class="font-medium text-gray-500">Service Name</p>
+                        <p class="text-gray-900"><?php echo esc_html($client->service_name); ?></p>
+                    </div>
+                    <?php endif; ?>
+                    <?php if ($client->panel_kw): ?>
+                    <div>
+                        <p class="font-medium text-gray-500">Panel K/W</p>
+                        <p class="text-gray-900"><?php echo esc_html($client->panel_kw); ?></p>
+                    </div>
+                    <?php endif; ?>
+                    <?php if ($client->proposal_amount): ?>
+                    <div>
+                        <p class="font-medium text-gray-500">Proposal Amount</p>
+                        <p class="text-gray-900"><?php echo number_format(floatval($client->proposal_amount), 2); ?></p>
+                    </div>
+                    <?php endif; ?>
                      <?php if ($client->file_url): ?>
                     <div class="sm:col-span-2">
                          <p class="font-medium text-gray-500">Uploaded File</p>
