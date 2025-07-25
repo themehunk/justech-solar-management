@@ -20,9 +20,19 @@ class JTSM_Solar_Management_List_View {
      */
     public function jtsm_render_client_list_page() {
         global $wpdb;
-        $clients_table = $wpdb->prefix . 'jtsm_clients';
+        $clients_table  = $wpdb->prefix . 'jtsm_clients';
         $payments_table = $wpdb->prefix . 'jtsm_payments';
-        $clients = $wpdb->get_results("SELECT * FROM $clients_table ORDER BY created_at DESC");
+
+        // Get filter from URL
+        $filter  = isset( $_GET['filter'] ) ? sanitize_text_field( $_GET['filter'] ) : 'all';
+
+        $sql_clients = "SELECT * FROM $clients_table";
+        if ( $filter === 'consumer' || $filter === 'seller' ) {
+            $sql_clients .= $wpdb->prepare( " WHERE user_type = %s", $filter );
+        }
+        $sql_clients .= " ORDER BY created_at DESC";
+
+        $clients = $wpdb->get_results( $sql_clients );
         ?>
         <div class="wrap bg-gray-100 p-6">
             <div class="flex items-center justify-between mb-4">
@@ -30,16 +40,40 @@ class JTSM_Solar_Management_List_View {
                 <a href="?page=jtsm-add-client" class="jstm-text-color inline-flex items-center px-4 py-2 bg-indigo-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-indigo-700">Add New Client</a>
             </div>
             
+            <!-- Filter Row -->
+            <div class="mb-4">
+                <form method="get" class="inline-block bg-white p-4 rounded-lg shadow-md">
+                    <input type="hidden" name="page" value="jtsm-main-menu">
+                    <label for="filter" class="text-sm font-medium text-gray-700 mr-2">Filter by Type:</label>
+                    <select name="filter" id="filter" onchange="this.form.submit()" class="rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
+                        <option value="all" <?php selected($filter, 'all'); ?>>All Types</option>
+                        <option value="consumer" <?php selected($filter, 'consumer'); ?>>Consumer</option>
+                        <option value="seller" <?php selected($filter, 'seller'); ?>>Seller</option>
+                    </select>
+                </form>
+            </div>
+
             <div class="bg-white shadow-md rounded-lg overflow-hidden">
                 <table class="min-w-full divide-y divide-gray-200">
-                    <thead class="bg-gray-50"><tr><th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Name</th><th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Company</th><th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Contact</th><th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Type</th><th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Total Paid</th><th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Actions</th></tr></thead>
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Name</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Company</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Contact</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Type</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Total Amount</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Total Paid</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Date Added</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
+                        </tr>
+                    </thead>
                     <tbody class="bg-white divide-y divide-gray-200">
                     <?php if ($clients): foreach ($clients as $client): ?>
                         <?php
                             $view_link = admin_url('admin.php?page=jtsm-view-client&client_id=' . $client->id);
                             $edit_link = admin_url('admin.php?page=jtsm-edit-client&client_id=' . $client->id);
                             $delete_link = wp_nonce_url(admin_url('admin.php?page=jtsm-main-menu&action=delete_client&client_id=' . $client->id), 'jtsm_delete_client_' . $client->id);
-                            $total_paid = $wpdb->get_var($wpdb->prepare( "SELECT SUM(CASE WHEN c.user_type = 'consumer' THEN p.amount ELSE p.amount_with_gst END) FROM $payments_table p JOIN $clients_table c ON p.client_id = c.id WHERE p.client_id = %d", $client->id ));
+                            $total_paid   = $wpdb->get_var($wpdb->prepare( "SELECT SUM(CASE WHEN c.user_type = 'consumer' THEN p.amount ELSE p.amount_with_gst END) FROM $payments_table p JOIN $clients_table c ON p.client_id = c.id WHERE p.client_id = %d", $client->id ));
                         ?>
                         <tr>
                             <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
@@ -48,7 +82,9 @@ class JTSM_Solar_Management_List_View {
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500"><?php echo esc_html($client->company_name); ?></td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500"><?php echo esc_html($client->contact_number); ?></td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500"><span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full <?php echo $client->user_type === 'consumer' ? 'bg-green-100 text-green-800' : 'bg-blue-100 text-blue-800'; ?>"><?php echo ucfirst(esc_html($client->user_type)); ?></span></td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500"><?php echo number_format(floatval($client->proposal_amount), 2); ?></td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500"><?php echo number_format(floatval($total_paid), 2); ?></td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500"><?php echo esc_html( date_i18n( get_option('date_format'), strtotime($client->created_at) ) ); ?></td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                                 <a href="<?php echo esc_url($view_link); ?>" class="text-gray-600 hover:text-indigo-900">View</a> |
                                 <a href="<?php echo esc_url($edit_link); ?>" class="text-indigo-600 hover:text-indigo-900">Edit</a> | 
@@ -56,7 +92,7 @@ class JTSM_Solar_Management_List_View {
                             </td>
                         </tr>
                     <?php endforeach; else: ?>
-                        <tr><td colspan="6" class="text-center py-4">No clients found.</td></tr>
+                        <tr><td colspan="8" class="text-center py-4">No clients found.</td></tr>
                     <?php endif; ?>
                     </tbody>
                 </table>
