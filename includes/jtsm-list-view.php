@@ -132,12 +132,19 @@ class JTSM_Solar_Management_List_View {
 
         $payments = $this->consumer_and_saller_total_amount($filter);
 
-        // Calculate total amount for the filtered payments
+        // Calculate total amounts by type
         $total_amount = 0;
+        $total_consumer_amount = 0;
+        $total_seller_amount   = 0;
         if ($payments) {
             foreach ($payments as $payment) {
-                $amount = $payment->user_type === 'consumer' ? $payment->amount : $payment->amount_with_gst;
-                $total_amount += floatval($amount);
+                if ($payment->user_type === 'consumer') {
+                    $total_consumer_amount += floatval($payment->amount);
+                    $total_amount += floatval($payment->amount);
+                } else {
+                    $total_seller_amount += floatval($payment->amount_with_gst);
+                    $total_amount += floatval($payment->amount_with_gst);
+                }
             }
         }
         ?>
@@ -148,7 +155,7 @@ class JTSM_Solar_Management_List_View {
             </div>
 
             <!-- Filter and Total Amount Row -->
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+            <div class="grid grid-cols-1 <?php echo $filter === 'all' ? 'md:grid-cols-3' : 'md:grid-cols-2'; ?> gap-4 mb-4">
                 <!-- Filter Form -->
                 <div class="bg-white p-4 rounded-lg shadow-md">
                     <form method="get">
@@ -161,13 +168,28 @@ class JTSM_Solar_Management_List_View {
                         </select>
                     </form>
                 </div>
-                <!-- Total Amount Display -->
-                <div class="bg-white p-4 rounded-lg shadow-md flex items-center justify-center">
-                    <div class="text-center">
-                        <p class="text-sm font-medium text-gray-500 uppercase">Total Amount</p>
-                        <p class="mt-1 text-3xl font-semibold text-gray-900"><?php echo number_format($total_amount, 2); ?></p>
+                <!-- Totals Display -->
+                <?php if ($filter === 'all'): ?>
+                    <div class="bg-white p-4 rounded-lg shadow-md flex items-center justify-center">
+                        <div class="text-center">
+                            <p class="text-sm font-medium text-gray-500 uppercase">Total Consumer Amount</p>
+                            <p class="mt-1 text-3xl font-semibold text-gray-900"><?php echo number_format($total_consumer_amount, 2); ?></p>
+                        </div>
                     </div>
-                </div>
+                    <div class="bg-white p-4 rounded-lg shadow-md flex items-center justify-center">
+                        <div class="text-center">
+                            <p class="text-sm font-medium text-gray-500 uppercase">Total Seller Amount</p>
+                            <p class="mt-1 text-3xl font-semibold text-gray-900"><?php echo number_format($total_seller_amount, 2); ?></p>
+                        </div>
+                    </div>
+                <?php else: ?>
+                    <div class="bg-white p-4 rounded-lg shadow-md flex items-center justify-center">
+                        <div class="text-center">
+                            <p class="text-sm font-medium text-gray-500 uppercase">Total Amount</p>
+                            <p class="mt-1 text-3xl font-semibold text-gray-900"><?php echo number_format($total_amount, 2); ?></p>
+                        </div>
+                    </div>
+                <?php endif; ?>
             </div>
 
             <div class="bg-white shadow-md rounded-lg overflow-hidden">
