@@ -31,7 +31,7 @@ class JTSM_Solar_Management_CRUD {
                     <?php wp_nonce_field( 'jtsm_add_client_action', 'jtsm_add_client_nonce' ); ?>
                     <div class="grid grid-cols-6 md:grid-cols-6 gap-6">
 
-                    <div class="md:col-span-2"><label for="jtsm_user_type" class="block text-sm font-medium text-gray-700">Type of User</label><select name="jtsm_user_type" id="jtsm_user_type" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"><option value="consumer">Consumer</option><option value="seller">Seller</option><option value="expanse">Expanse</option></select></div>
+                    <div class="md:col-span-2"><label for="jtsm_user_type" class="block text-sm font-medium text-gray-700">Type of User</label><select name="jtsm_user_type" id="jtsm_user_type" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"><option value="consumer">Consumer</option><option value="seller">Seller</option><option value="expender">Expender</option></select></div>
 
                     <div class="md:col-span-4"><label for="jtsm_company_name" class="jtsm-seller block text-sm font-medium text-gray-700">Company Name</label><input type="text" name="jtsm_company_name" id="jtsm_company_name" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"></div>
 
@@ -161,7 +161,7 @@ class JTSM_Solar_Management_CRUD {
                             <select name="jtsm_user_type" id="jtsm_user_type" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
                                 <option value="consumer" <?php selected( $client->user_type, 'consumer' ); ?>>Consumer</option>
                                 <option value="seller" <?php selected( $client->user_type, 'seller' ); ?>>Seller</option>
-                                <option value="expanse" <?php selected( $client->user_type, 'expanse' ); ?>>Expanse</option>
+                                <option value="expender" <?php selected( $client->user_type, 'expender' ); ?>>Expender</option>
                             </select>
                         </div>
 
@@ -285,7 +285,7 @@ class JTSM_Solar_Management_CRUD {
         }
 
         global $wpdb;
-        $clients = $wpdb->get_results("SELECT id, first_name, last_name FROM {$wpdb->prefix}jtsm_clients ORDER BY first_name ASC");
+        $clients = $wpdb->get_results("SELECT id, first_name, last_name, user_type FROM {$wpdb->prefix}jtsm_clients ORDER BY user_type, first_name ASC");
         ?>
         <div class="wrap bg-gray-100 p-6">
             <h1 class="text-2xl font-semibold text-gray-800 mb-4"><?php _e('Add New Payment', 'jtsm'); ?></h1>
@@ -297,8 +297,19 @@ class JTSM_Solar_Management_CRUD {
                         <label for="jtsm_client_id" class="block text-sm font-medium text-gray-700">Select Client</label>
                         <select name="jtsm_client_id" id="jtsm_client_id" required class="mt-1 block w-full md:w-1/2 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
                             <option value="">-- Select --</option>
-                            <?php foreach ($clients as $client): ?>
-                                <option value="<?php echo esc_attr($client->id); ?>"><?php echo esc_html($client->first_name . ' ' . $client->last_name); ?></option>
+                            <?php
+                            $grouped = [ 'consumer' => [], 'seller' => [], 'expender' => [] ];
+                            foreach ( $clients as $client ) {
+                                $grouped[ $client->user_type ][] = $client;
+                            }
+                            foreach ( $grouped as $type => $items ) :
+                                if ( ! $items ) continue;
+                                ?>
+                                <optgroup label="<?php echo ucfirst( esc_html( $type ) ); ?>">
+                                    <?php foreach ( $items as $c ) : ?>
+                                        <option value="<?php echo esc_attr( $c->id ); ?>"><?php echo esc_html( $c->first_name . ' ' . $c->last_name ); ?></option>
+                                    <?php endforeach; ?>
+                                </optgroup>
                             <?php endforeach; ?>
                         </select>
                     </div>
@@ -328,7 +339,7 @@ class JTSM_Solar_Management_CRUD {
                     </div>
 
                     <div id="jtsm-expanse-form" class="hidden space-y-4">
-                        <h2 class="text-lg font-medium text-gray-900 border-b pb-2">Expanse Payment</h2>
+                        <h2 class="text-lg font-medium text-gray-900 border-b pb-2">Expender Payment</h2>
                         <div><label for="jtsm_expanse_service" class="block text-sm font-medium text-gray-700">Service</label><input type="text" name="jtsm_expanse_service" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm"></div>
                         <div><label for="jtsm_expanse_amount" class="block text-sm font-medium text-gray-700">Amount</label><input type="number" step="0.01" name="jtsm_expanse_amount" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm"></div>
                         <div><label for="jtsm_payment_mode_expanse" class="block text-sm font-medium text-gray-700">Payment Mode</label><select name="jtsm_payment_mode_expanse" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm"><option value="upi">UPI</option><option value="cash">Cash</option><option value="netbanking">Net Banking</option><option value="other">Other</option></select></div>
@@ -386,7 +397,7 @@ class JTSM_Solar_Management_CRUD {
                     $data['invoice_url'] = $movefile['url'];
                 }
             }
-        } else { // Expanse
+        } else { // Expender
             $data['expense_service'] = sanitize_text_field($_POST['jtsm_expanse_service']);
             $data['amount'] = floatval($_POST['jtsm_expanse_amount']);
             $data['payment_mode'] = sanitize_text_field($_POST['jtsm_payment_mode_expanse']);

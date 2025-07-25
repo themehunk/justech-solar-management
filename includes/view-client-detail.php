@@ -57,7 +57,17 @@ function jtsm_render_view_client_page() {
                     </div>
                     <div>
                         <p class="font-medium text-gray-500">Client Type</p>
-                        <p class="text-gray-900"><span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full <?php echo $client->user_type === 'consumer' ? 'bg-green-100 text-green-800' : 'bg-blue-100 text-blue-800'; ?>"><?php echo ucfirst(esc_html($client->user_type)); ?></span></p>
+                        <p class="text-gray-900">
+                            <?php
+                            $badge = 'bg-blue-100 text-blue-800';
+                            if ($client->user_type === 'consumer') {
+                                $badge = 'bg-green-100 text-green-800';
+                            } elseif ($client->user_type === 'seller') {
+                                $badge = 'bg-pink-100 text-pink-800';
+                            }
+                            ?>
+                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full <?php echo $badge; ?>"><?php echo ucfirst(esc_html($client->user_type)); ?></span>
+                        </p>
                     </div>
                     <div>
                         <p class="font-medium text-gray-500">Contact Number</p>

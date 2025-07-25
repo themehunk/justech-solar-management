@@ -27,7 +27,7 @@ class JTSM_Solar_Management_List_View {
         $filter  = isset( $_GET['filter'] ) ? sanitize_text_field( $_GET['filter'] ) : 'all';
 
         $sql_clients = "SELECT * FROM $clients_table";
-        if ( $filter === 'consumer' || $filter === 'seller' || $filter === 'expanse' ) {
+        if ( $filter === 'consumer' || $filter === 'seller' || $filter === 'expender' ) {
             $sql_clients .= $wpdb->prepare( " WHERE user_type = %s", $filter );
         }
         $sql_clients .= " ORDER BY created_at DESC";
@@ -49,7 +49,7 @@ class JTSM_Solar_Management_List_View {
                         <option value="all" <?php selected($filter, 'all'); ?>>All Types</option>
                         <option value="consumer" <?php selected($filter, 'consumer'); ?>>Consumer</option>
                         <option value="seller" <?php selected($filter, 'seller'); ?>>Seller</option>
-                        <option value="expanse" <?php selected($filter, 'expanse'); ?>>Expanse</option>
+                        <option value="expender" <?php selected($filter, 'expender'); ?>>Expender</option>
                     </select>
                 </form>
             </div>
@@ -82,7 +82,17 @@ class JTSM_Solar_Management_List_View {
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500"><?php echo esc_html($client->company_name); ?></td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500"><?php echo esc_html($client->contact_number); ?></td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500"><span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full <?php echo $client->user_type === 'consumer' ? 'bg-green-100 text-green-800' : 'bg-blue-100 text-blue-800'; ?>"><?php echo ucfirst(esc_html($client->user_type)); ?></span></td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                <?php
+                                $badge = 'bg-blue-100 text-blue-800';
+                                if ($client->user_type === 'consumer') {
+                                    $badge = 'bg-green-100 text-green-800';
+                                } elseif ($client->user_type === 'seller') {
+                                    $badge = 'bg-pink-100 text-pink-800';
+                                }
+                                ?>
+                                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full <?php echo $badge; ?>"><?php echo ucfirst(esc_html($client->user_type)); ?></span>
+                            </td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500"><?php echo number_format(floatval($client->proposal_amount), 2); ?></td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500"><?php echo number_format(floatval($total_paid), 2); ?></td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500"><?php echo esc_html( date_i18n( get_option('date_format'), strtotime($client->created_at) ) ); ?></td>
@@ -113,7 +123,7 @@ class JTSM_Solar_Management_List_View {
         $sql = "SELECT p.*, c.first_name, c.last_name, c.user_type FROM $payments_table p LEFT JOIN $clients_table c ON p.client_id = c.id";
 
         // Add a WHERE clause if a filter is selected
-        if ($filter === 'consumer' || $filter === 'seller' || $filter === 'expanse') {
+        if ($filter === 'consumer' || $filter === 'seller' || $filter === 'expender') {
             $sql .= $wpdb->prepare(" WHERE c.user_type = %s", $filter);
         }
 
@@ -137,7 +147,9 @@ class JTSM_Solar_Management_List_View {
         $total_amount = 0;
         $total_consumer_amount = 0;
         $total_seller_amount   = 0;
-        $total_expanse_amount  = 0;
+        $total_expender_received = 0;
+        $total_expender_sent    = 0;
+        $total_expender_amount  = 0;
         if ($payments) {
             foreach ($payments as $payment) {
                 if ($payment->user_type === 'consumer') {
@@ -146,8 +158,15 @@ class JTSM_Solar_Management_List_View {
                 } elseif ($payment->user_type === 'seller') {
                     $total_seller_amount += floatval($payment->amount_with_gst);
                     $total_amount += floatval($payment->amount_with_gst);
+                } elseif ($payment->user_type === 'expender') {
+                    if ($payment->payment_type === 'receiver') {
+                        $total_expender_received += floatval($payment->amount);
+                    } else {
+                        $total_expender_sent += floatval($payment->amount);
+                    }
+                    $total_expender_amount += floatval($payment->amount);
+                    $total_amount += floatval($payment->amount);
                 } else {
-                    $total_expanse_amount += floatval($payment->amount);
                     $total_amount += floatval($payment->amount);
                 }
             }
@@ -160,7 +179,7 @@ class JTSM_Solar_Management_List_View {
             </div>
 
             <!-- Filter and Total Amount Row -->
-            <div class="grid grid-cols-1 <?php echo $filter === 'all' ? 'md:grid-cols-3' : 'md:grid-cols-2'; ?> gap-4 mb-4">
+            <div class="grid grid-cols-1 <?php echo $filter === 'all' ? 'md:grid-cols-4' : 'md:grid-cols-2'; ?> gap-4 mb-4">
                 <!-- Filter Form -->
                 <div class="bg-white p-4 rounded-lg shadow-md">
                     <form method="get">
@@ -170,18 +189,12 @@ class JTSM_Solar_Management_List_View {
                             <option value="all" <?php selected($filter, 'all'); ?>>All Types</option>
                             <option value="consumer" <?php selected($filter, 'consumer'); ?>>Consumer</option>
                             <option value="seller" <?php selected($filter, 'seller'); ?>>Seller</option>
-                            <option value="expanse" <?php selected($filter, 'expanse'); ?>>Expanse</option>
+                            <option value="expender" <?php selected($filter, 'expender'); ?>>Expender</option>
                         </select>
                     </form>
                 </div>
                 <!-- Totals Display -->
                 <?php if ($filter === 'all'): ?>
-                    <div class="bg-white p-4 rounded-lg shadow-md flex items-center justify-center">
-                        <div class="text-center">
-                            <p class="text-sm font-medium text-gray-500 uppercase">Total Consumer Amount</p>
-                            <p class="mt-1 text-3xl font-semibold text-gray-900"><?php echo number_format($total_consumer_amount, 2); ?></p>
-                        </div>
-                    </div>
                     <div class="bg-white p-4 rounded-lg shadow-md flex items-center justify-center">
                         <div class="text-center">
                             <p class="text-sm font-medium text-gray-500 uppercase">Total Seller Amount</p>
@@ -190,17 +203,44 @@ class JTSM_Solar_Management_List_View {
                     </div>
                     <div class="bg-white p-4 rounded-lg shadow-md flex items-center justify-center">
                         <div class="text-center">
-                            <p class="text-sm font-medium text-gray-500 uppercase">Total Expanse Amount</p>
-                            <p class="mt-1 text-3xl font-semibold text-gray-900"><?php echo number_format($total_expanse_amount, 2); ?></p>
+                            <p class="text-sm font-medium text-gray-500 uppercase">Total Expender Amount</p>
+                            <p class="mt-1 text-3xl font-semibold text-gray-900"><?php echo number_format($total_expender_amount, 2); ?></p>
+                        </div>
+                    </div>
+                    <div class="bg-white p-4 rounded-lg shadow-md flex items-center justify-center">
+                        <div class="text-center">
+                            <p class="text-sm font-medium text-gray-500 uppercase">Total Consumer Amount</p>
+                            <p class="mt-1 text-3xl font-semibold text-gray-900"><?php echo number_format($total_consumer_amount, 2); ?></p>
                         </div>
                     </div>
                 <?php else: ?>
-                    <div class="bg-white p-4 rounded-lg shadow-md flex items-center justify-center">
-                        <div class="text-center">
-                            <p class="text-sm font-medium text-gray-500 uppercase">Total Amount</p>
-                            <p class="mt-1 text-3xl font-semibold text-gray-900"><?php echo number_format($total_amount, 2); ?></p>
+                    <?php if ($filter === 'expender'): ?>
+                        <div class="bg-white p-4 rounded-lg shadow-md flex items-center justify-center">
+                            <div class="text-center">
+                                <p class="text-sm font-medium text-gray-500 uppercase">Total Received</p>
+                                <p class="mt-1 text-3xl font-semibold text-gray-900"><?php echo number_format($total_expender_received, 2); ?></p>
+                            </div>
                         </div>
-                    </div>
+                        <div class="bg-white p-4 rounded-lg shadow-md flex items-center justify-center">
+                            <div class="text-center">
+                                <p class="text-sm font-medium text-gray-500 uppercase">Total Sent</p>
+                                <p class="mt-1 text-3xl font-semibold text-gray-900"><?php echo number_format($total_expender_sent, 2); ?></p>
+                            </div>
+                        </div>
+                        <div class="bg-white p-4 rounded-lg shadow-md flex items-center justify-center">
+                            <div class="text-center">
+                                <p class="text-sm font-medium text-gray-500 uppercase">Final Amount</p>
+                                <p class="mt-1 text-3xl font-semibold text-gray-900"><?php echo number_format($total_expender_received - $total_expender_sent, 2); ?></p>
+                            </div>
+                        </div>
+                    <?php else: ?>
+                        <div class="bg-white p-4 rounded-lg shadow-md flex items-center justify-center">
+                            <div class="text-center">
+                                <p class="text-sm font-medium text-gray-500 uppercase">Total Amount</p>
+                                <p class="mt-1 text-3xl font-semibold text-gray-900"><?php echo number_format($total_amount, 2); ?></p>
+                            </div>
+                        </div>
+                    <?php endif; ?>
                 <?php endif; ?>
             </div>
 
@@ -215,7 +255,17 @@ class JTSM_Solar_Management_List_View {
                     <?php if ($payments): foreach ($payments as $payment): ?>
                         <tr>
                             <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900"><?php echo esc_html($payment->first_name . ' ' . $payment->last_name); ?></td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500"><span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full <?php echo $payment->user_type === 'consumer' ? 'bg-green-100 text-green-800' : 'bg-blue-100 text-blue-800'; ?>"><?php echo ucfirst(esc_html($payment->user_type)); ?></span></td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                <?php
+                                $badge = 'bg-blue-100 text-blue-800';
+                                if ($payment->user_type === 'consumer') {
+                                    $badge = 'bg-green-100 text-green-800';
+                                } elseif ($payment->user_type === 'seller') {
+                                    $badge = 'bg-pink-100 text-pink-800';
+                                }
+                                ?>
+                                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full <?php echo $badge; ?>"><?php echo ucfirst(esc_html($payment->user_type)); ?></span>
+                            </td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500"><?php echo esc_html($payment->payment_date); ?></td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                 <?php 
@@ -230,7 +280,7 @@ class JTSM_Solar_Management_List_View {
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500"><?php echo ucfirst(esc_html($payment->payment_mode)); ?></td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                 <?php
-                                    if ($payment->user_type === 'expanse') {
+                                    if ($payment->user_type === 'expender') {
                                         echo ucfirst(esc_html($payment->payment_type));
                                     } else {
                                         echo ucfirst(esc_html($payment->payment_receive));
