@@ -3,7 +3,7 @@
  * Plugin Name:       Justech Solar Management (Custom Tables)
  * Plugin URI:        https://example.com/
  * Description:       A plugin to manage solar clients and payments using custom database tables and Tailwind CSS.
- * Version:           2.4.0
+ * Version:           2.5.0
  * Author:            Your Name
  * Author URI:        https://example.com/
  * License:           GPL v2 or later
@@ -20,7 +20,7 @@ if ( ! defined( 'WPINC' ) ) {
 /**
  * Define constants for the plugin.
  */
-define( 'JTSM_VERSION', '2.4.0' );
+define( 'JTSM_VERSION', '2.5.0' );
 define( 'JTSM_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
 define( 'JTSM_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
 
