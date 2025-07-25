@@ -78,6 +78,8 @@ final class JTSM_Solar_Management_Setup {
             user_type varchar(20) DEFAULT 'consumer' NOT NULL,
             gstin varchar(15),
             product_service text,
+            product_kw varchar(50),
+            proposal_amount decimal(10,2),
             file_url varchar(255),
             status varchar(20) DEFAULT 'pending' NOT NULL,
             created_at datetime DEFAULT CURRENT_TIMESTAMP NOT NULL,

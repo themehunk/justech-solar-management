@@ -8,6 +8,34 @@ jQuery(document).ready(function($) {
     const sellerForm = $('#jtsm-seller-form');
     const submitContainer = $('#jtsm-submit-button-container');
 
+    // --- Add Client Form Logic ---
+    const userTypeField = $('#jtsm_user_type');
+    const serviceField = $('#product_service').closest('div');
+    const panelKwField = $('#product_kw').closest('div');
+    const proposalField = $('#proposal_amount').closest('div');
+
+    function toggleClientFields(userType) {
+        if (userType === 'seller') {
+            serviceField.hide();
+            panelKwField.hide();
+            proposalField.hide();
+            $('#product_service').prop('required', false);
+        } else {
+            serviceField.show();
+            panelKwField.show();
+            proposalField.show();
+            $('#product_service').prop('required', true);
+        }
+    }
+
+    // Initialize client fields based on current selection
+    if (userTypeField.length) {
+        toggleClientFields(userTypeField.val());
+        userTypeField.on('change', function () {
+            toggleClientFields($(this).val());
+        });
+    }
+
     // Function to show/hide payment forms based on client type
     function togglePaymentForms(clientType) {
         // Hide all forms and the submit button first
