@@ -6,6 +6,7 @@ jQuery(document).ready(function($) {
     const clientSelector = $('#jtsm_client_id');
     const consumerForm = $('#jtsm-consumer-form');
     const sellerForm = $('#jtsm-seller-form');
+    const expanseForm = $('#jtsm-expanse-form');
     const submitContainer = $('#jtsm-submit-button-container');
 
     // --- Add Client Form Logic ---
@@ -13,17 +14,30 @@ jQuery(document).ready(function($) {
     const serviceField = $('#product_service').closest('div');
     const panelKwField = $('#product_kw').closest('div');
     const proposalField = $('#proposal_amount').closest('div');
+    const companyField = $('#jtsm_company_name').closest('div');
+    const shortDescField = $('#jtsm_short_description').closest('div');
 
     function toggleClientFields(userType) {
         if (userType === 'seller') {
             serviceField.hide();
             panelKwField.hide();
             proposalField.hide();
+            companyField.show();
+            shortDescField.hide();
+            $('#product_service').prop('required', false);
+        } else if (userType === 'expanse') {
+            serviceField.hide();
+            panelKwField.hide();
+            proposalField.hide();
+            companyField.hide();
+            shortDescField.show();
             $('#product_service').prop('required', false);
         } else {
             serviceField.show();
             panelKwField.show();
             proposalField.show();
+            companyField.show();
+            shortDescField.hide();
             $('#product_service').prop('required', true);
         }
     }
@@ -41,6 +55,7 @@ jQuery(document).ready(function($) {
         // Hide all forms and the submit button first
         consumerForm.hide();
         sellerForm.hide();
+        expanseForm.hide();
         submitContainer.hide();
 
         if (clientType === 'consumer') {
@@ -48,6 +63,9 @@ jQuery(document).ready(function($) {
             submitContainer.show();
         } else if (clientType === 'seller') {
             sellerForm.show();
+            submitContainer.show();
+        } else if (clientType === 'expanse') {
+            expanseForm.show();
             submitContainer.show();
         }
     }

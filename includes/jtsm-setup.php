@@ -71,6 +71,7 @@ final class JTSM_Solar_Management_Setup {
             company_name tinytext,
             contact_number varchar(20) DEFAULT '' NOT NULL,
             email varchar(100) DEFAULT '' NOT NULL,
+            short_description text,
             address text,
             city tinytext,
             state tinytext,
@@ -99,6 +100,8 @@ final class JTSM_Solar_Management_Setup {
             payment_receive varchar(100),
             payment_date date,
             invoice_url varchar(255),
+            expense_service text,
+            payment_type varchar(20),
             created_at datetime DEFAULT CURRENT_TIMESTAMP NOT NULL,
             PRIMARY KEY  (id)
         ) $charset_collate;";
