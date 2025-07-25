@@ -29,18 +29,46 @@ class JTSM_Solar_Management_CRUD {
             <div class="bg-white p-6 rounded-lg shadow-md">
                 <form method="POST" enctype="multipart/form-data">
                     <?php wp_nonce_field( 'jtsm_add_client_action', 'jtsm_add_client_nonce' ); ?>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div><label for="jtsm_first_name" class="block text-sm font-medium text-gray-700">First Name</label><input type="text" name="jtsm_first_name" id="jtsm_first_name" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"></div>
-                        <div><label for="jtsm_last_name" class="block text-sm font-medium text-gray-700">Last Name</label><input type="text" name="jtsm_last_name" id="jtsm_last_name" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"></div>
-                        <div><label for="jtsm_company_name" class="block text-sm font-medium text-gray-700">Company Name</label><input type="text" name="jtsm_company_name" id="jtsm_company_name" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"></div>
-                        <div><label for="jtsm_contact_number" class="block text-sm font-medium text-gray-700">Contact Number</label><input type="text" name="jtsm_contact_number" id="jtsm_contact_number" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"></div>
-                        <div class="md:col-span-2"><label for="jtsm_email" class="block text-sm font-medium text-gray-700">Email</label><input type="email" name="jtsm_email" id="jtsm_email" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"></div>
-                        <div class="md:col-span-2"><label for="jtsm_address" class="block text-sm font-medium text-gray-700">Address</label><textarea name="jtsm_address" id="jtsm_address" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"></textarea></div>
-                        <div class="jtsm-consumer-field"><label for="jtsm_service_name" class="block text-sm font-medium text-gray-700">Service Name</label><input type="text" name="jtsm_service_name" id="jtsm_service_name" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"></div>
-                        <div class="jtsm-consumer-field"><label for="jtsm_panel_kw" class="block text-sm font-medium text-gray-700">Panel K/W</label><input type="number" step="0.01" name="jtsm_panel_kw" id="jtsm_panel_kw" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"></div>
-                        <div class="jtsm-consumer-field"><label for="jtsm_proposal_amount" class="block text-sm font-medium text-gray-700">Proposal Amount</label><input type="number" step="0.01" name="jtsm_proposal_amount" id="jtsm_proposal_amount" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"></div>
-                        <div><label for="jtsm_user_type" class="block text-sm font-medium text-gray-700">Type of User</label><select name="jtsm_user_type" id="jtsm_user_type" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"><option value="consumer">Consumer</option><option value="seller">Seller</option></select></div>
-                        <div><label for="jtsm_file_upload" class="block text-sm font-medium text-gray-700">File Upload</label><input type="file" name="jtsm_file_upload" id="jtsm_file_upload" class="mt-1 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-600 hover:file:bg-indigo-100"></div>
+                    <div class="grid grid-cols-6 md:grid-cols-6 gap-6">
+
+                    <div class="md:col-span-2"><label for="jtsm_user_type" class="block text-sm font-medium text-gray-700">Type of User</label><select name="jtsm_user_type" id="jtsm_user_type" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"><option value="consumer">Consumer</option><option value="seller">Seller</option></select></div>
+
+                    <div class="md:col-span-4"><label for="jtsm_company_name" class="jtsm-seller block text-sm font-medium text-gray-700">Company Name</label><input type="text" name="jtsm_company_name" id="jtsm_company_name" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"></div>
+
+
+                        <div class="md:col-span-3"><label for="jtsm_first_name" class="block text-sm font-medium text-gray-700">First Name</label><input type="text" name="jtsm_first_name" id="jtsm_first_name" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"></div>
+
+                        <div class="md:col-span-3"><label for="jtsm_last_name" class="block text-sm font-medium text-gray-700">Last Name</label><input type="text" name="jtsm_last_name" id="jtsm_last_name" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"></div>
+
+                        <div class="md:col-span-3"><label for="jtsm_email" class="block text-sm font-medium text-gray-700">Email</label><input type="email" name="jtsm_email" id="jtsm_email" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"></div>
+
+
+
+                        <div class="md:col-span-3"><label for="jtsm_contact_number" class="block text-sm font-medium text-gray-700">Contact Number</label><input type="text" name="jtsm_contact_number" id="jtsm_contact_number" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"></div>
+
+
+                        <div class="md:col-span-2">
+                        <label for="product_service" class="block text-sm font-medium text-gray-700">Service Name</label>
+                        <input type="text" name="product_service" id="product_service" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
+                        </div>
+
+                        <div class="md:col-span-2">
+                        <label for="product_kw" class="block text-sm font-medium text-gray-700">Panel K/W</label>
+                        <input type="text" name="product_kw" id="product_kw" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
+                        </div>
+
+                        <div class="md:col-span-2">
+                        <label for="proposal_amount" class="block text-sm font-medium text-gray-700">Proposal Amount</label>
+                        <input type="text" name="proposal_amount" id="proposal_amount" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
+                        </div>
+
+
+                        <div class="md:col-span-3"><label for="jtsm_address" class="block text-sm font-medium text-gray-700">Address</label><textarea name="jtsm_address" id="jtsm_address" class="h-24 mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"></textarea></div>
+
+             
+
+
+                        <div class="md:col-span-3"><label for="jtsm_file_upload" class="block text-sm font-medium text-gray-700">File Upload</label><input type="file" name="jtsm_file_upload" id="jtsm_file_upload" class="mt-1 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-600 hover:file:bg-indigo-100"></div>
                     </div>
                     <div class="mt-6">
                         <?php submit_button('Add Client', 'primary', 'submit', true, ['class' => 'inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500']); ?>
@@ -59,16 +87,16 @@ class JTSM_Solar_Management_CRUD {
         $table_name = $wpdb->prefix . 'jtsm_clients';
         
         $data = [
-            'first_name'       => sanitize_text_field($_POST['jtsm_first_name']),
-            'last_name'        => sanitize_text_field($_POST['jtsm_last_name']),
-            'company_name'     => sanitize_text_field($_POST['jtsm_company_name']),
-            'contact_number'   => sanitize_text_field($_POST['jtsm_contact_number']),
-            'email'            => sanitize_email($_POST['jtsm_email']),
-            'address'          => sanitize_textarea_field($_POST['jtsm_address']),
-            'service_name'     => isset($_POST['jtsm_service_name']) ? sanitize_text_field($_POST['jtsm_service_name']) : '',
-            'panel_kw'         => isset($_POST['jtsm_panel_kw']) ? sanitize_text_field($_POST['jtsm_panel_kw']) : '',
-            'proposal_amount'  => isset($_POST['jtsm_proposal_amount']) ? floatval($_POST['jtsm_proposal_amount']) : 0,
-            'user_type'        => sanitize_text_field($_POST['jtsm_user_type']),
+            'first_name' => sanitize_text_field($_POST['jtsm_first_name']),
+            'last_name' => sanitize_text_field($_POST['jtsm_last_name']),
+            'company_name' => sanitize_text_field($_POST['jtsm_company_name']),
+            'contact_number' => sanitize_text_field($_POST['jtsm_contact_number']),
+            'product_service' => sanitize_text_field($_POST['product_service']),
+            'product_kw' => sanitize_text_field($_POST['product_kw']),
+            'proposal_amount' => floatval($_POST['proposal_amount']),
+            'email' => sanitize_email($_POST['jtsm_email']),
+            'address' => sanitize_textarea_field($_POST['jtsm_address']),
+            'user_type' => sanitize_text_field($_POST['jtsm_user_type']),
         ];
 
         if ( ! empty( $_FILES['jtsm_file_upload']['name'] ) ) {
@@ -177,6 +205,10 @@ class JTSM_Solar_Management_CRUD {
             $data['amount'] = floatval($_POST['jtsm_amount']);
             $data['payment_mode'] = sanitize_text_field($_POST['jtsm_payment_mode_consumer']);
             $data['payment_receive'] = sanitize_text_field($_POST['jtsm_payment_receive_consumer']);
+            $data['payment_date'] = sanitize_text_field($_POST['jtsm_payment_date_consumer']);
+
+
+            
             $data['payment_date'] = sanitize_text_field($_POST['jtsm_payment_date_consumer']);
         } else { // Seller
             $data['amount_without_gst'] = floatval($_POST['jtsm_amount_without_gst']);

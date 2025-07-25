@@ -1,24 +1,6 @@
 jQuery(document).ready(function($) {
     'use strict';
 
-    // --- Add Client Form Logic ---
-    const userTypeSelect = $('#jtsm_user_type');
-    const consumerFields = $('.jtsm-consumer-field');
-
-    function toggleClientFields() {
-        if (!userTypeSelect.length) {
-            return;
-        }
-        if (userTypeSelect.val() === 'seller') {
-            consumerFields.hide();
-        } else {
-            consumerFields.show();
-        }
-    }
-
-    toggleClientFields();
-    userTypeSelect.on('change', toggleClientFields);
-
     // --- Dynamic Payment Form Logic ---
 
     const clientSelector = $('#jtsm_client_id');
