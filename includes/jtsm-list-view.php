@@ -281,6 +281,9 @@ class JTSM_Solar_Management_List_View {
                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th></tr></thead>
                     <tbody class="bg-white divide-y divide-gray-200">
                     <?php if ($payments): foreach ($payments as $payment): ?>
+                        <?php
+                            $edit_link = admin_url('admin.php?page=jtsm-edit-payment&payment_id=' . $payment->id);
+                        ?>
                         <tr>
                             <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900"><?php echo esc_html($payment->first_name . ' ' . $payment->last_name); ?></td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
@@ -318,7 +321,7 @@ class JTSM_Solar_Management_List_View {
                                 ?>
                             </td>
 
-                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium"><a href="#" class="text-indigo-600 hover:text-indigo-900">Edit</a> | <a href="#" class="text-red-600 hover:text-red-900">Delete</a></td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium"><a href="<?php echo esc_url($edit_link); ?>" class="text-indigo-600 hover:text-indigo-900">Edit</a> | <a href="#" class="text-red-600 hover:text-red-900">Delete</a></td>
                         </tr>
                     <?php endforeach; else: ?>
                         <tr><td colspan="6" class="text-center py-4">No payments found for this filter.</td></tr>
