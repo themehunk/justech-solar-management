@@ -14,6 +14,31 @@ class JTSM_Solar_Management_List_View {
            return self::$instance;
        }
 
+       function total_payment_clients($clients_table,$clientId){
+                global $wpdb;
+
+                $payments_table = $wpdb->prefix . 'jtsm_payments';
+
+        $total_paid = $wpdb->get_var(
+                $wpdb->prepare(
+                    "
+                    SELECT SUM(
+                        CASE 
+                            WHEN c.user_type IN ('consumer', 'seller', 'expender') THEN p.amount 
+                            ELSE p.amount_with_gst 
+                        END
+                    )
+                    FROM $payments_table p
+                    JOIN $clients_table c ON p.client_id = c.id
+                    WHERE p.client_id = %d
+                    ",
+                    $clientId
+                )
+            );
+
+            return number_format(floatval($total_paid), 2);
+        }
+
 
     /**
      * Render the list of all clients.
@@ -21,7 +46,6 @@ class JTSM_Solar_Management_List_View {
     public function jtsm_render_client_list_page() {
         global $wpdb;
         $clients_table  = $wpdb->prefix . 'jtsm_clients';
-        $payments_table = $wpdb->prefix . 'jtsm_payments';
 
         // Get filter from URL
         $filter  = isset( $_GET['filter'] ) ? sanitize_text_field( $_GET['filter'] ) : 'all';
@@ -74,8 +98,7 @@ class JTSM_Solar_Management_List_View {
                             $view_link = admin_url('admin.php?page=jtsm-view-client&client_id=' . $client->id);
                             $edit_link = admin_url('admin.php?page=jtsm-edit-client&client_id=' . $client->id);
                             $delete_link = wp_nonce_url(admin_url('admin.php?page=jtsm-main-menu&action=delete_client&client_id=' . $client->id), 'jtsm_delete_client_' . $client->id);
-                            $total_paid   = $wpdb->get_var($wpdb->prepare( "SELECT SUM(CASE WHEN c.user_type = 'consumer' THEN p.amount ELSE p.amount_with_gst END) FROM $payments_table p JOIN $clients_table c ON p.client_id = c.id WHERE p.client_id = %d", $client->id ));
-                        ?>
+                  ?>
                         <tr>
                             <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                                 <a href="<?php echo esc_url($view_link); ?>" class="text-indigo-600 hover:text-indigo-900"><?php echo esc_html($client->first_name . ' ' . $client->last_name); ?></a>
@@ -94,7 +117,7 @@ class JTSM_Solar_Management_List_View {
                                 <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full <?php echo $badge; ?>"><?php echo ucfirst(esc_html($client->user_type)); ?></span>
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500"><?php echo number_format(floatval($client->proposal_amount), 2); ?></td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500"><?php echo number_format(floatval($total_paid), 2); ?></td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500"><?php echo $this->total_payment_clients($clients_table,$client->id); ?></td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500"><?php echo esc_html( date_i18n( get_option('date_format'), strtotime($client->created_at) ) ); ?></td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                                 <a href="<?php echo esc_url($view_link); ?>" class="text-gray-600 hover:text-indigo-900">View</a> |
@@ -161,8 +184,8 @@ class JTSM_Solar_Management_List_View {
                     $total_consumer_amount += floatval($payment->amount);
                     $total_amount += floatval($payment->amount);
                 } elseif ($payment->user_type === 'seller') {
-                    $total_seller_amount += floatval($payment->amount_with_gst);
-                    $total_amount += floatval($payment->amount_with_gst);
+                    $total_seller_amount += floatval($payment->amount);
+                    $total_amount += floatval($payment->amount);
                 } elseif ($payment->user_type === 'expender') {
                     if ($payment->payment_type === 'receiver') {
                         $total_expender_received += floatval($payment->amount);
@@ -274,11 +297,9 @@ class JTSM_Solar_Management_List_View {
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500"><?php echo esc_html($payment->payment_date); ?></td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                 <?php 
-                                    if ($payment->user_type === 'seller') {
-                                        $amount = $payment->amount_with_gst;
-                                    } else {
+                                
                                         $amount = $payment->amount;
-                                    }
+                              
                                     echo number_format(floatval($amount), 2);
                                 ?>
                             </td>

@@ -334,7 +334,7 @@ class JTSM_Solar_Management_CRUD {
 
                     <div id="jtsm-seller-form" class="hidden space-y-4">
                         <h2 class="text-lg font-medium text-gray-900 border-b pb-2">Seller Payment</h2>
-                        <div><label for="jtsm_amount_without_gst" class="block text-sm font-medium text-gray-700">Amount (w/o GST)</label><input type="number" step="0.01" id="jtsm_amount_without_gst" name="jtsm_amount_without_gst" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm"></div>
+                        <div><label for="jtsm_amount_without_gst" class="block text-sm font-medium text-gray-700">Amount (w/o GST)</label><input type="number" id="jtsm_amount_without_gst" name="jtsm_amount_without_gst" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm"></div>
                         <div><label for="jtsm_gst_rate" class="block text-sm font-medium text-gray-700">GST Rate</label><select id="jtsm_gst_rate" name="jtsm_gst_rate" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm"><option value="0">0%</option><option value="6">6%</option><option value="12">12%</option><option value="18">18%</option><option value="28">28%</option></select></div>
                         <div><label for="jtsm_amount_with_gst" class="block text-sm font-medium text-gray-700">Total Amount (with GST)</label><input type="text" id="jtsm_amount_with_gst" name="jtsm_amount_with_gst" readonly class="mt-1 block w-full rounded-md border-gray-300 bg-gray-100 shadow-sm"></div>
                         <div><label for="jtsm_invoice_upload" class="block text-sm font-medium text-gray-700">Invoice Upload</label><input type="file" name="jtsm_invoice_upload" class="mt-1 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:font-semibold file:bg-indigo-50 file:text-indigo-600 hover:file:bg-indigo-100"></div>
@@ -345,7 +345,7 @@ class JTSM_Solar_Management_CRUD {
                     <div id="jtsm-expanse-form" class="hidden space-y-4">
                         <h2 class="text-lg font-medium text-gray-900 border-b pb-2">Expender Payment</h2>
                         <div><label for="jtsm_expanse_service" class="block text-sm font-medium text-gray-700">Service</label><input type="text" name="jtsm_expanse_service" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm"></div>
-                        <div><label for="jtsm_expanse_amount" class="block text-sm font-medium text-gray-700">Amount</label><input type="number" step="0.01" name="jtsm_expanse_amount" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm"></div>
+                        <div><label for="jtsm_expanse_amount" class="block text-sm font-medium text-gray-700">Amount</label><input type="number" name="jtsm_expanse_amount" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm"></div>
                         <div><label for="jtsm_payment_mode_expanse" class="block text-sm font-medium text-gray-700">Payment Mode</label><select name="jtsm_payment_mode_expanse" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm"><option value="upi">UPI</option><option value="cash">Cash</option><option value="netbanking">Net Banking</option><option value="other">Other</option></select></div>
                         <div><label for="jtsm_payment_type_expanse" class="block text-sm font-medium text-gray-700">Payment Type</label><select id="jtsm_payment_type_expanse" name="jtsm_payment_type_expanse" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm"><option value="receiver">Receiver</option><option value="sender">Sender</option></select></div>
                         <div id="jtsm-other-client-container" class="hidden">
@@ -401,7 +401,7 @@ class JTSM_Solar_Management_CRUD {
         } elseif ($client->user_type === 'seller') {
             $data['amount_without_gst'] = floatval($_POST['jtsm_amount_without_gst']);
             $data['gst_rate'] = intval($_POST['jtsm_gst_rate']);
-            $data['amount_with_gst'] = floatval($_POST['jtsm_amount_with_gst']);
+            $data['amount'] = floatval($_POST['jtsm_amount_with_gst']);
             $data['payment_mode'] = sanitize_text_field($_POST['jtsm_payment_mode_seller']);
             $data['payment_date'] = sanitize_text_field($_POST['jtsm_payment_date_seller']);
             if ( ! empty( $_FILES['jtsm_invoice_upload']['name'] ) ) {

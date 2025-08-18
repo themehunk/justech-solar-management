@@ -29,12 +29,13 @@ function jtsm_render_view_client_page() {
     $total_paid = 0;
     if ($payments) {
         foreach ($payments as $payment) {
-            $amount = $client->user_type === 'consumer' ? $payment->amount : $payment->amount_with_gst;
-            $total_paid += floatval($amount);
+            $total_paid += floatval($payment->amount);
         }
     }
     $proposal_amount = floatval($client->proposal_amount);
     $total_remaining = $proposal_amount - $total_paid;
+
+    $client_type = $client->user_type;
     ?>
     <div class="wrap bg-gray-100 p-6">
         <!-- Header -->
@@ -60,9 +61,9 @@ function jtsm_render_view_client_page() {
                         <p class="text-gray-900">
                             <?php
                             $badge = 'bg-blue-100 text-blue-800';
-                            if ($client->user_type === 'consumer') {
+                            if ($client_type === 'consumer') {
                                 $badge = 'bg-green-100 text-green-800';
-                            } elseif ($client->user_type === 'seller') {
+                            } elseif ($client_type === 'seller') {
                                 $badge = 'bg-pink-100 text-pink-800';
                             }
                             ?>
@@ -94,6 +95,7 @@ function jtsm_render_view_client_page() {
                     </div>
                     <?php endif; ?>
                     <?php if ($client->proposal_amount): ?>
+                        
                     <div>
                         <p class="font-medium text-gray-500">Proposal Amount</p>
                         <p class="text-gray-900"><?php echo number_format(floatval($client->proposal_amount), 2); ?></p>
@@ -108,19 +110,25 @@ function jtsm_render_view_client_page() {
                 </div>
             </div>
             <!-- Summary Cards -->
-            <div class="flex flex-col gap-4">
+              <div class="flex flex-col gap-4">
+               <div class="bg-white p-6 rounded-lg shadow-md flex flex-col items-center justify-center text-center">
+                    <h2 class="text-xl font-semibold text-gray-800 mb-2">Total Amount Paid</h2>
+                    <p class="text-3xl font-bold text-indigo-600"><?php echo number_format($total_paid, 2); ?></p>
+                </div>
+                <?php if ($client_type === 'consumer') { ?>
+                            
+           
                 <div class="bg-white p-6 rounded-lg shadow-md flex flex-col items-center justify-center text-center">
                     <h2 class="text-xl font-semibold text-gray-800 mb-2">Proposal Amount</h2>
                     <p class="text-3xl font-bold text-indigo-600"><?php echo number_format($proposal_amount, 2); ?></p>
                 </div>
-                <div class="bg-white p-6 rounded-lg shadow-md flex flex-col items-center justify-center text-center">
-                    <h2 class="text-xl font-semibold text-gray-800 mb-2">Total Amount Paid</h2>
-                    <p class="text-3xl font-bold text-indigo-600"><?php echo number_format($total_paid, 2); ?></p>
-                </div>
+
+              
                 <div class="bg-white p-6 rounded-lg shadow-md flex flex-col items-center justify-center text-center">
                     <h2 class="text-xl font-semibold text-gray-800 mb-2">Total Remaining</h2>
                     <p class="text-3xl font-bold text-indigo-600"><?php echo number_format($total_remaining, 2); ?></p>
                 </div>
+                        <?php } ?>
             </div>
         </div>
 
@@ -131,7 +139,7 @@ function jtsm_render_view_client_page() {
                 <thead class="bg-gray-50">
                     <tr>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
-                        <?php if ($client->user_type === 'consumer'): ?>
+                        <?php if ($client_type === 'consumer'): ?>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Installment</th>
                         <?php else: ?>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Invoice</th>
@@ -164,8 +172,7 @@ function jtsm_render_view_client_page() {
 
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 text-right">
                                 <?php 
-                                    $amount = $client->user_type === 'consumer' ? $payment->amount : $payment->amount_with_gst;
-                                    echo number_format(floatval($amount), 2);
+                                    echo number_format(floatval($payment->amount), 2);
                                 ?>
                             </td>
                         </tr>
