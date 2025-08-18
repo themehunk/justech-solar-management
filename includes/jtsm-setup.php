@@ -14,7 +14,7 @@ final class JTSM_Solar_Management_Setup {
 
     private function __construct() {
 
-
+        JTSM_Solar_Management_List_View::instance();
 
 
         add_action( 'admin_menu', [ $this, 'jtsm_admin_menu' ] );

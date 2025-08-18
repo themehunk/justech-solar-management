@@ -6,6 +6,11 @@ class JTSM_Solar_Management_List_View {
        // Singleton instance
        private static $instance = null;
 
+       private function __construct() {
+           add_action('wp_ajax_jtsm_search_clients', [ $this, 'jtsm_search_clients' ]);
+           add_action('wp_ajax_jtsm_search_payments', [ $this, 'jtsm_search_payments' ]);
+       }
+
        // Get instance
        public static function instance() {
            if ( self::$instance === null ) {
@@ -64,8 +69,8 @@ class JTSM_Solar_Management_List_View {
                 <a href="?page=jtsm-add-client" class="jstm-text-color inline-flex items-center px-4 py-2 bg-indigo-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-indigo-700">Add New Client</a>
             </div>
             
-            <!-- Filter Row -->
-            <div class="mb-4">
+            <!-- Filter and Search Row -->
+            <div class="mb-4 flex items-center space-x-4">
                 <form method="get" class="inline-block bg-white p-4 rounded-lg shadow-md">
                     <input type="hidden" name="page" value="jtsm-main-menu">
                     <label for="filter" class="text-sm font-medium text-gray-700 mr-2">Filter by Type:</label>
@@ -76,6 +81,7 @@ class JTSM_Solar_Management_List_View {
                         <option value="expender" <?php selected($filter, 'expender'); ?>>Expender</option>
                     </select>
                 </form>
+                <input type="text" id="jtsm-client-search" placeholder="Search..." class="bg-white p-4 rounded-lg shadow-md" />
             </div>
 
             <div class="bg-white shadow-md rounded-lg overflow-hidden">
@@ -92,7 +98,7 @@ class JTSM_Solar_Management_List_View {
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
                         </tr>
                     </thead>
-                    <tbody class="bg-white divide-y divide-gray-200">
+                    <tbody id="jtsm-client-table-body" class="bg-white divide-y divide-gray-200">
                     <?php if ($clients): foreach ($clients as $client): ?>
                         <?php
                             $view_link = admin_url('admin.php?page=jtsm-view-client&client_id=' . $client->id);
@@ -136,7 +142,7 @@ class JTSM_Solar_Management_List_View {
     }
 
 
-    function consumer_and_saller_total_amount($filter){
+    function consumer_and_saller_total_amount($filter, $search = ''){
 
         global $wpdb;
         $clients_table = $wpdb->prefix . 'jtsm_clients';
@@ -150,9 +156,18 @@ class JTSM_Solar_Management_List_View {
                 LEFT JOIN $clients_table c ON p.client_id = c.id
                 LEFT JOIN $clients_table oc ON p.other_client_id = oc.id";
 
-        // Add a WHERE clause if a filter is selected
+        $where = [];
         if ($filter === 'consumer' || $filter === 'seller' || $filter === 'expender') {
-            $sql .= $wpdb->prepare(" WHERE c.user_type = %s", $filter);
+            $where[] = $wpdb->prepare("c.user_type = %s", $filter);
+        }
+
+        if ($search !== '') {
+            $like = '%' . $wpdb->esc_like($search) . '%';
+            $where[] = $wpdb->prepare("(c.first_name LIKE %s OR c.last_name LIKE %s OR p.payment_date LIKE %s)", $like, $like, $like);
+        }
+
+        if ($where) {
+            $sql .= ' WHERE ' . implode(' AND ', $where);
         }
 
         $sql .= " ORDER BY p.payment_date DESC";
@@ -271,7 +286,10 @@ class JTSM_Solar_Management_List_View {
                     <?php endif; ?>
                 <?php endif; ?>
             </div>
-
+            <!-- Search Row -->
+            <div class="mb-4">
+                <input type="text" id="jtsm-payment-search" placeholder="Search..." class="bg-white p-4 rounded-lg shadow-md" />
+            </div>
             <div class="bg-white shadow-md rounded-lg overflow-hidden">
                 <table class="min-w-full divide-y divide-gray-200">
                     <thead class="bg-gray-50"><tr><th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Client</th><th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Client Type</th><th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Payment Date</th><th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Amount</th>
@@ -279,7 +297,7 @@ class JTSM_Solar_Management_List_View {
                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Receive/Type</th>
 
                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th></tr></thead>
-                    <tbody class="bg-white divide-y divide-gray-200">
+                    <tbody id="jtsm-payment-table-body" class="bg-white divide-y divide-gray-200">
                     <?php if ($payments): foreach ($payments as $payment): ?>
                         <tr>
                             <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900"><?php echo esc_html($payment->first_name . ' ' . $payment->last_name); ?></td>
@@ -329,5 +347,99 @@ class JTSM_Solar_Management_List_View {
             </div>
         </div>
         <?php
+    }
+
+    public function jtsm_search_clients() {
+        check_ajax_referer('jtsm_ajax_nonce');
+        global $wpdb;
+        $term   = isset($_POST['term']) ? sanitize_text_field($_POST['term']) : '';
+        $filter = isset($_POST['filter']) ? sanitize_text_field($_POST['filter']) : 'all';
+        $clients_table  = $wpdb->prefix . 'jtsm_clients';
+
+        $sql = "SELECT * FROM $clients_table";
+        $where = [];
+        if ( $filter === 'consumer' || $filter === 'seller' || $filter === 'expender' ) {
+            $where[] = $wpdb->prepare("user_type = %s", $filter);
+        }
+        if ( $term !== '' ) {
+            $like = '%' . $wpdb->esc_like($term) . '%';
+            $where[] = $wpdb->prepare("(first_name LIKE %s OR last_name LIKE %s OR company_name LIKE %s OR contact_number LIKE %s)", $like, $like, $like, $like);
+        }
+        if ($where) {
+            $sql .= ' WHERE ' . implode(' AND ', $where);
+        }
+        $sql .= " ORDER BY created_at DESC";
+        $clients = $wpdb->get_results($sql);
+
+        ob_start();
+        if ($clients) {
+            foreach ($clients as $client) {
+                $view_link = admin_url('admin.php?page=jtsm-view-client&client_id=' . $client->id);
+                $edit_link = admin_url('admin.php?page=jtsm-edit-client&client_id=' . $client->id);
+                $delete_link = wp_nonce_url(admin_url('admin.php?page=jtsm-main-menu&action=delete_client&client_id=' . $client->id), 'jtsm_delete_client_' . $client->id);
+                $badge = 'bg-blue-100 text-blue-800';
+                if ($client->user_type === 'consumer') {
+                    $badge = 'bg-green-100 text-green-800';
+                } elseif ($client->user_type === 'seller') {
+                    $badge = 'bg-pink-100 text-pink-800';
+                }
+                echo '<tr>';
+                echo '<td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900"><a href="' . esc_url($view_link) . '" class="text-indigo-600 hover:text-indigo-900">' . esc_html($client->first_name . ' ' . $client->last_name) . '</a></td>';
+                echo '<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">' . esc_html($client->company_name) . '</td>';
+                echo '<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">' . esc_html($client->contact_number) . '</td>';
+                echo '<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500"><span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full ' . $badge . '">' . ucfirst(esc_html($client->user_type)) . '</span></td>';
+                echo '<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">' . number_format(floatval($client->proposal_amount), 2) . '</td>';
+                echo '<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">' . $this->total_payment_clients($clients_table, $client->id) . '</td>';
+                echo '<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">' . esc_html( date_i18n( get_option('date_format'), strtotime($client->created_at) ) ) . '</td>';
+                echo '<td class="px-6 py-4 whitespace-nowrap text-sm font-medium"><a href="' . esc_url($view_link) . '" class="text-gray-600 hover:text-indigo-900">View</a> | <a href="' . esc_url($edit_link) . '" class="text-indigo-600 hover:text-indigo-900">Edit</a> | <a href="' . esc_url($delete_link) . '" class="text-red-600 hover:text-red-900" onclick="return confirm(\'Are you sure you want to delete this client and all their payments?\');">Delete</a></td>';
+                echo '</tr>';
+            }
+        } else {
+            echo '<tr><td colspan="8" class="text-center py-4">No clients found.</td></tr>';
+        }
+        $html = ob_get_clean();
+        wp_send_json_success(['html' => $html]);
+    }
+
+    public function jtsm_search_payments() {
+        check_ajax_referer('jtsm_ajax_nonce');
+        $term   = isset($_POST['term']) ? sanitize_text_field($_POST['term']) : '';
+        $filter = isset($_POST['filter']) ? sanitize_text_field($_POST['filter']) : 'all';
+        $payments = $this->consumer_and_saller_total_amount($filter, $term);
+
+        ob_start();
+        if ($payments) {
+            foreach ($payments as $payment) {
+                $edit_link = admin_url('admin.php?page=jtsm-edit-payment&payment_id=' . $payment->id);
+                $badge = 'bg-blue-100 text-blue-800';
+                if ($payment->user_type === 'consumer') {
+                    $badge = 'bg-green-100 text-green-800';
+                } elseif ($payment->user_type === 'seller') {
+                    $badge = 'bg-pink-100 text-pink-800';
+                }
+                echo '<tr>';
+                echo '<td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">' . esc_html($payment->first_name . ' ' . $payment->last_name) . '</td>';
+                echo '<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500"><span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full ' . $badge . '">' . ucfirst(esc_html($payment->user_type)) . '</span></td>';
+                echo '<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">' . esc_html($payment->payment_date) . '</td>';
+                $amount = $payment->amount;
+                echo '<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">' . number_format(floatval($amount), 2) . '</td>';
+                echo '<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">' . ucfirst(esc_html($payment->payment_mode)) . '</td>';
+                if ($payment->user_type === 'expender') {
+                    $label = ucfirst(esc_html($payment->payment_type));
+                    if ($payment->payment_type === 'sender' && $payment->other_first_name) {
+                        $label .= ' to ' . esc_html($payment->other_first_name . ' ' . $payment->other_last_name);
+                    }
+                    echo '<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">' . $label . '</td>';
+                } else {
+                    echo '<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">' . ucfirst(esc_html($payment->payment_receive)) . '</td>';
+                }
+                echo '<td class="px-6 py-4 whitespace-nowrap text-sm font-medium"><a href="' . esc_url($edit_link) . '" class="text-indigo-600 hover:text-indigo-900">Edit</a> | <a href="#" class="text-red-600 hover:text-red-900">Delete</a></td>';
+                echo '</tr>';
+            }
+        } else {
+            echo '<tr><td colspan="6" class="text-center py-4">No payments found for this filter.</td></tr>';
+        }
+        $html = ob_get_clean();
+        wp_send_json_success(['html' => $html]);
     }
 }

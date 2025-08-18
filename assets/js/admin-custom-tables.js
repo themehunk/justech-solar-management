@@ -150,4 +150,44 @@ jQuery(document).ready(function($) {
         });
     }
 
+    // --- AJAX Search for Clients ---
+    const clientSearch = $('#jtsm-client-search');
+    clientSearch.on('input', function () {
+        $.ajax({
+            url: jtsm_ajax_object.ajax_url,
+            type: 'POST',
+            data: {
+                action: 'jtsm_search_clients',
+                _ajax_nonce: jtsm_ajax_object.nonce,
+                term: $(this).val(),
+                filter: $('#filter').val()
+            },
+            success: function (response) {
+                if (response.success) {
+                    $('#jtsm-client-table-body').html(response.data.html);
+                }
+            }
+        });
+    });
+
+    // --- AJAX Search for Payments ---
+    const paymentSearch = $('#jtsm-payment-search');
+    paymentSearch.on('input', function () {
+        $.ajax({
+            url: jtsm_ajax_object.ajax_url,
+            type: 'POST',
+            data: {
+                action: 'jtsm_search_payments',
+                _ajax_nonce: jtsm_ajax_object.nonce,
+                term: $(this).val(),
+                filter: $('#filter').val()
+            },
+            success: function (response) {
+                if (response.success) {
+                    $('#jtsm-payment-table-body').html(response.data.html);
+                }
+            }
+        });
+    });
+
 });
