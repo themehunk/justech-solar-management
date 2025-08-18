@@ -108,6 +108,10 @@ jQuery(document).ready(function($) {
         });
     });
 
+    if (clientSelector.length && clientSelector.val()) {
+        clientSelector.trigger('change');
+    }
+
 
     // --- Seller Payment GST Calculation ---
     const amountWithoutGstField = $('#jtsm_amount_without_gst');
