@@ -20,6 +20,8 @@ final class JTSM_Solar_Management_Setup {
         add_action( 'admin_menu', [ $this, 'jtsm_admin_menu' ] );
         add_action( 'admin_enqueue_scripts', [ $this, 'jtsm_enqueue_scripts' ] );
         add_action( 'wp_ajax_jtsm_get_client_type_table', [ $this, 'jtsm_get_client_type_ajax_handler' ] );
+        add_action( 'wp_ajax_jtsm_search_clients', [ JTSM_Solar_Management_List_View::instance(), 'jtsm_ajax_search_clients' ] );
+        add_action( 'wp_ajax_jtsm_search_payments', [ JTSM_Solar_Management_List_View::instance(), 'jtsm_ajax_search_payments' ] );
     }
 
     /**
@@ -35,10 +37,11 @@ final class JTSM_Solar_Management_Setup {
 
         // Enqueue Tailwind CSS
         wp_enqueue_script('tailwindcss', 'https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4', array('jquery'), JTSM_VERSION, true);
-        
+
         // Enqueue JS for dynamic forms
         wp_enqueue_script( 'jtsm-admin-js', JTSM_PLUGIN_URL . 'assets/js/admin-custom-tables.js', [ 'jquery' ], JTSM_VERSION, true );
         wp_localize_script( 'jtsm-admin-js', 'jtsm_ajax_object', [ 'ajax_url' => admin_url( 'admin-ajax.php' ), 'nonce' => wp_create_nonce('jtsm_ajax_nonce') ] );
+        wp_enqueue_script( 'jtsm-search-js', JTSM_PLUGIN_URL . 'assets/js/jtsm-search.js', [ 'jquery', 'jtsm-admin-js' ], JTSM_VERSION, true );
     }
 
     /**
