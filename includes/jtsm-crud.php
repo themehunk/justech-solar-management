@@ -374,6 +374,178 @@ class JTSM_Solar_Management_CRUD {
         <?php
     }
 
+    /**
+     * Render the page to edit an existing payment.
+     */
+    public function jtsm_render_edit_payment_page() {
+        if ( ! isset( $_GET['payment_id'] ) ) {
+            echo '<div class="wrap"><div class="notice notice-error"><p>No payment specified.</p></div></div>';
+            return;
+        }
+
+        global $wpdb;
+        $payment_id     = intval( $_GET['payment_id'] );
+        $payments_table = $wpdb->prefix . 'jtsm_payments';
+        $clients_table  = $wpdb->prefix . 'jtsm_clients';
+
+        $payment = $wpdb->get_row( $wpdb->prepare( "SELECT * FROM $payments_table WHERE id = %d", $payment_id ) );
+        if ( ! $payment ) {
+            echo '<div class="wrap"><div class="notice notice-error"><p>Payment not found.</p></div></div>';
+            return;
+        }
+
+        $client = $wpdb->get_row( $wpdb->prepare( "SELECT id, first_name, last_name, user_type FROM $clients_table WHERE id = %d", $payment->client_id ) );
+        if ( ! $client ) {
+            echo '<div class="wrap"><div class="notice notice-error"><p>Client not found.</p></div></div>';
+            return;
+        }
+
+        if ( 'POST' === $_SERVER['REQUEST_METHOD'] && isset( $_POST['jtsm_edit_payment_nonce'] ) && wp_verify_nonce( $_POST['jtsm_edit_payment_nonce'], 'jtsm_edit_payment_action' ) ) {
+            $this->jtsm_update_payment_data( $payment_id, $client );
+            $payment = $wpdb->get_row( $wpdb->prepare( "SELECT * FROM $payments_table WHERE id = %d", $payment_id ) );
+        }
+
+        $clients = $wpdb->get_results(
+            "SELECT id, first_name, last_name, user_type
+             FROM {$wpdb->prefix}jtsm_clients
+             ORDER BY FIELD(user_type, 'expender','consumer','seller'), first_name ASC"
+        );
+        $grouped = [ 'expender' => [], 'consumer' => [], 'seller' => [] ];
+        foreach ( $clients as $c ) {
+            $grouped[ $c->user_type ][] = $c;
+        }
+        ?>
+        <div class="wrap bg-gray-100 p-6">
+            <h1 class="text-2xl font-semibold text-gray-800 mb-4"><?php _e('Edit Payment', 'jtsm'); ?></h1>
+            <div class="bg-white p-6 rounded-lg shadow-md">
+                <form method="POST" enctype="multipart/form-data">
+                    <?php wp_nonce_field( 'jtsm_edit_payment_action', 'jtsm_edit_payment_nonce' ); ?>
+                    <div class="mb-6">
+                        <label class="block text-sm font-medium text-gray-700">Client</label>
+                        <p class="mt-1 text-sm"><?php echo esc_html( $client->first_name . ' ' . $client->last_name ); ?></p>
+                    </div>
+
+                    <?php if ( $client->user_type === 'consumer' ) : ?>
+                        <div id="jtsm-consumer-form" class="space-y-4">
+                            <h2 class="text-lg font-medium text-gray-900 border-b pb-2">Consumer Payment</h2>
+                            <div><label for="jtsm_installment" class="block text-sm font-medium text-gray-700">Installment</label><select name="jtsm_installment" class="mt-1 block w-3xs rounded-md border-gray-300 shadow-sm"><option value="1" <?php selected( $payment->installment, '1' ); ?>>1st</option><option value="2" <?php selected( $payment->installment, '2' ); ?>>2nd</option><option value="3" <?php selected( $payment->installment, '3' ); ?>>3rd</option><option value="final" <?php selected( $payment->installment, 'final' ); ?>>Final</option></select></div>
+                            <div><label for="jtsm_amount" class="block text-sm font-medium text-gray-700">Amount</label><input type="number" step="0.01" name="jtsm_amount" value="<?php echo esc_attr( $payment->amount ); ?>" class="mt-1 block w-3xs rounded-md border-gray-300 shadow-sm"></div>
+                            <div><label for="jtsm_payment_mode_consumer" class="block text-sm font-medium text-gray-700">Payment Mode</label><select name="jtsm_payment_mode_consumer" class="mt-1 block w-3xs rounded-md border-gray-300 shadow-sm"><option value="upi" <?php selected( $payment->payment_mode, 'upi' ); ?>>UPI</option><option value="cash" <?php selected( $payment->payment_mode, 'cash' ); ?>>Cash</option><option value="netbanking" <?php selected( $payment->payment_mode, 'netbanking' ); ?>>Net Banking</option><option value="other" <?php selected( $payment->payment_mode, 'other' ); ?>>Other</option></select></div>
+                            <div><label for="jtsm_payment_receive_consumer" class="block text-sm font-medium text-gray-700">Payment Receive</label><input type="text" name="jtsm_payment_receive_consumer" value="<?php echo esc_attr( $payment->payment_receive ); ?>" class="mt-1 block w-3xs rounded-md border-gray-300 shadow-sm" /></div>
+                            <div><label for="jtsm_payment_date_consumer" class="block text-sm font-medium text-gray-700">Payment Date</label><input type="date" name="jtsm_payment_date_consumer" value="<?php echo esc_attr( $payment->payment_date ); ?>" class="mt-1 block w-3xs rounded-md border-gray-300 shadow-sm"></div>
+                        </div>
+                    <?php elseif ( $client->user_type === 'seller' ) : ?>
+                        <div id="jtsm-seller-form" class="space-y-4">
+                            <h2 class="text-lg font-medium text-gray-900 border-b pb-2">Seller Payment</h2>
+                            <div><label for="jtsm_amount_without_gst" class="block text-sm font-medium text-gray-700">Amount (w/o GST)</label><input type="number" id="jtsm_amount_without_gst" name="jtsm_amount_without_gst" value="<?php echo esc_attr( $payment->amount_without_gst ); ?>" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm"></div>
+                            <div><label for="jtsm_gst_rate" class="block text-sm font-medium text-gray-700">GST Rate</label><select id="jtsm_gst_rate" name="jtsm_gst_rate" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm"><option value="0" <?php selected( $payment->gst_rate, 0 ); ?>>0%</option><option value="6" <?php selected( $payment->gst_rate, 6 ); ?>>6%</option><option value="12" <?php selected( $payment->gst_rate, 12 ); ?>>12%</option><option value="18" <?php selected( $payment->gst_rate, 18 ); ?>>18%</option><option value="28" <?php selected( $payment->gst_rate, 28 ); ?>>28%</option></select></div>
+                            <div><label for="jtsm_amount_with_gst" class="block text-sm font-medium text-gray-700">Total Amount (with GST)</label><input type="text" id="jtsm_amount_with_gst" name="jtsm_amount_with_gst" value="<?php echo esc_attr( $payment->amount ); ?>" readonly class="mt-1 block w-full rounded-md border-gray-300 bg-gray-100 shadow-sm"></div>
+                            <?php if ( $payment->invoice_url ) : ?><p class="text-sm"><a href="<?php echo esc_url( $payment->invoice_url ); ?>" target="_blank" class="text-indigo-600 hover:underline">View Invoice</a></p><?php endif; ?>
+                            <div><label for="jtsm_invoice_upload" class="block text-sm font-medium text-gray-700">Invoice Upload</label><input type="file" name="jtsm_invoice_upload" class="mt-1 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:font-semibold file:bg-indigo-50 file:text-indigo-600 hover:file:bg-indigo-100"></div>
+                            <div><label for="jtsm_payment_mode_seller" class="block text-sm font-medium text-gray-700">Payment Mode</label><select name="jtsm_payment_mode_seller" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm"><option value="upi" <?php selected( $payment->payment_mode, 'upi' ); ?>>UPI</option><option value="cash" <?php selected( $payment->payment_mode, 'cash' ); ?>>Cash</option><option value="netbanking" <?php selected( $payment->payment_mode, 'netbanking' ); ?>>Net Banking</option><option value="other" <?php selected( $payment->payment_mode, 'other' ); ?>>Other</option></select></div>
+                            <div><label for="jtsm_payment_date_seller" class="block text-sm font-medium text-gray-700">Payment Date</label><input type="date" name="jtsm_payment_date_seller" value="<?php echo esc_attr( $payment->payment_date ); ?>" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm"></div>
+                        </div>
+                    <?php else : ?>
+                        <div id="jtsm-expanse-form" class="space-y-4">
+                            <h2 class="text-lg font-medium text-gray-900 border-b pb-2">Expender Payment</h2>
+                            <div><label for="jtsm_expanse_service" class="block text-sm font-medium text-gray-700">Service</label><input type="text" name="jtsm_expanse_service" value="<?php echo esc_attr( $payment->expense_service ); ?>" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm"></div>
+                            <div><label for="jtsm_expanse_amount" class="block text-sm font-medium text-gray-700">Amount</label><input type="number" name="jtsm_expanse_amount" value="<?php echo esc_attr( $payment->amount ); ?>" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm"></div>
+                            <div><label for="jtsm_payment_mode_expanse" class="block text-sm font-medium text-gray-700">Payment Mode</label><select name="jtsm_payment_mode_expanse" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm"><option value="upi" <?php selected( $payment->payment_mode, 'upi' ); ?>>UPI</option><option value="cash" <?php selected( $payment->payment_mode, 'cash' ); ?>>Cash</option><option value="netbanking" <?php selected( $payment->payment_mode, 'netbanking' ); ?>>Net Banking</option><option value="other" <?php selected( $payment->payment_mode, 'other' ); ?>>Other</option></select></div>
+                            <div><label for="jtsm_payment_type_expanse" class="block text-sm font-medium text-gray-700">Payment Type</label><select id="jtsm_payment_type_expanse" name="jtsm_payment_type_expanse" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm"><option value="receiver" <?php selected( $payment->payment_type, 'receiver' ); ?>>Receiver</option><option value="sender" <?php selected( $payment->payment_type, 'sender' ); ?>>Sender</option></select></div>
+                            <div id="jtsm-other-client-container" class="<?php echo ( $payment->payment_type === 'sender' ) ? '' : 'hidden'; ?>">
+                                <label for="jtsm_other_client_id" class="block text-sm font-medium text-gray-700">Select Other Client</label>
+                                <select name="jtsm_other_client_id" id="jtsm_other_client_id" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm">
+                                    <option value="">-- Select Client --</option>
+                                    <?php foreach ( $grouped as $type => $items ) : ?>
+                                        <?php if ( ! $items ) continue; ?>
+                                        <optgroup label="<?php echo ucfirst( esc_html( $type ) ); ?>">
+                                            <?php foreach ( $items as $c ) : ?>
+                                                <?php if ( $c->id == $client->id ) continue; ?>
+                                                <option value="<?php echo esc_attr( $c->id ); ?>" <?php selected( $payment->other_client_id, $c->id ); ?>><?php echo esc_html( $c->first_name . ' ' . $c->last_name ); ?></option>
+                                            <?php endforeach; ?>
+                                        </optgroup>
+                                    <?php endforeach; ?>
+                                </select>
+                            </div>
+                            <div><label for="jtsm_payment_date_expanse" class="block text-sm font-medium text-gray-700">Payment Date</label><input type="date" name="jtsm_payment_date_expanse" value="<?php echo esc_attr( $payment->payment_date ); ?>" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm"></div>
+                        </div>
+                    <?php endif; ?>
+
+                    <div id="jtsm-submit-button-container" class="mt-6">
+                        <?php submit_button('Update Payment', 'primary', 'submit', true, ['class' => 'inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500']); ?>
+                    </div>
+                </form>
+            </div>
+        </div>
+        <script>
+        jQuery(document).ready(function($){
+            $('#jtsm-consumer-form, #jtsm-seller-form, #jtsm-expanse-form').hide();
+            var type = '<?php echo esc_js( $client->user_type ); ?>';
+            if (type === 'consumer') {
+                $('#jtsm-consumer-form').show();
+            } else if (type === 'seller') {
+                $('#jtsm-seller-form').show();
+            } else if (type === 'expender') {
+                $('#jtsm-expanse-form').show();
+            }
+        });
+        </script>
+        <?php
+    }
+
+    /**
+     * Update payment data in the custom table.
+     */
+    private function jtsm_update_payment_data( $payment_id, $client ) {
+        global $wpdb;
+        $table_name = $wpdb->prefix . 'jtsm_payments';
+
+        $data = [];
+
+        if ( $client->user_type === 'consumer' ) {
+            $data['installment']    = sanitize_text_field( $_POST['jtsm_installment'] );
+            $data['amount']         = floatval( $_POST['jtsm_amount'] );
+            $data['payment_mode']   = sanitize_text_field( $_POST['jtsm_payment_mode_consumer'] );
+            $data['payment_receive'] = sanitize_text_field( $_POST['jtsm_payment_receive_consumer'] );
+            $data['payment_date']   = sanitize_text_field( $_POST['jtsm_payment_date_consumer'] );
+        } elseif ( $client->user_type === 'seller' ) {
+            $data['amount_without_gst'] = floatval( $_POST['jtsm_amount_without_gst'] );
+            $data['gst_rate']           = intval( $_POST['jtsm_gst_rate'] );
+            $data['amount']             = floatval( $_POST['jtsm_amount_with_gst'] );
+            $data['payment_mode']       = sanitize_text_field( $_POST['jtsm_payment_mode_seller'] );
+            $data['payment_date']       = sanitize_text_field( $_POST['jtsm_payment_date_seller'] );
+            if ( ! empty( $_FILES['jtsm_invoice_upload']['name'] ) ) {
+                if ( ! function_exists( 'wp_handle_upload' ) ) {
+                    require_once ABSPATH . 'wp-admin/includes/file.php';
+                }
+                $uploadedfile     = $_FILES['jtsm_invoice_upload'];
+                $upload_overrides = [ 'test_form' => false ];
+                $movefile         = wp_handle_upload( $uploadedfile, $upload_overrides );
+                if ( $movefile && ! isset( $movefile['error'] ) ) {
+                    $data['invoice_url'] = $movefile['url'];
+                }
+            }
+        } else { // Expender
+            $data['expense_service'] = sanitize_text_field( $_POST['jtsm_expanse_service'] );
+            $data['amount']          = floatval( $_POST['jtsm_expanse_amount'] );
+            $data['payment_mode']    = sanitize_text_field( $_POST['jtsm_payment_mode_expanse'] );
+            $data['payment_type']    = sanitize_text_field( $_POST['jtsm_payment_type_expanse'] );
+            $data['payment_date']    = sanitize_text_field( $_POST['jtsm_payment_date_expanse'] );
+            if ( isset( $_POST['jtsm_other_client_id'] ) && $_POST['jtsm_payment_type_expanse'] === 'sender' ) {
+                $data['other_client_id'] = intval( $_POST['jtsm_other_client_id'] );
+            } else {
+                $data['other_client_id'] = null;
+            }
+        }
+
+        $result = $wpdb->update( $table_name, $data, [ 'id' => $payment_id ] );
+
+        if ( false !== $result ) {
+            echo '<div class="notice notice-success is-dismissible"><p>Payment updated successfully!</p></div>';
+        } else {
+            echo '<div class="notice notice-error is-dismissible"><p>There was an error updating the payment.</p></div>';
+        }
+    }
 
 
      /**

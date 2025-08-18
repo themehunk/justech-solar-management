@@ -146,8 +146,8 @@ function jtsm_render_view_client_page() {
                         <?php endif; ?>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Mode</th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Receive</th>
-
                         <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Amount</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
                     </tr>
                 </thead>
                 <tbody class="bg-white divide-y divide-gray-200">
@@ -169,20 +169,22 @@ function jtsm_render_view_client_page() {
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500"><?php echo ucfirst(esc_html($payment->payment_mode)); ?></td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500"><?php echo ucfirst(esc_html($payment->payment_receive)); ?></td>
-
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 text-right">
-                                <?php 
+                                <?php
                                     echo number_format(floatval($payment->amount), 2);
                                 ?>
                             </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                <a href="<?php echo esc_url( admin_url( 'admin.php?page=jtsm-edit-payment&payment_id=' . $payment->id ) ); ?>" class="text-indigo-600 hover:text-indigo-900">Edit</a>
+                            </td>
                         </tr>
                     <?php endforeach; else: ?>
-                        <tr><td colspan="4" class="text-center py-10 text-gray-500">No payments have been recorded for this client.</td></tr>
+                        <tr><td colspan="6" class="text-center py-10 text-gray-500">No payments have been recorded for this client.</td></tr>
                     <?php endif; ?>
                 </tbody>
                  <tfoot class="bg-gray-50">
                     <tr>
-                        <td colspan="4" class="px-6 py-3 text-right text-sm font-bold text-zinc-950 uppercase">Total</td>
+                        <td colspan="5" class="px-6 py-3 text-right text-sm font-bold text-zinc-950 uppercase">Total</td>
                         <td class="px-6 py-3 text-right text-sm font-bold text-zinc-950"><?php echo number_format($total_paid, 2); ?></td>
                     </tr>
                 </tfoot>
