@@ -6,3 +6,9 @@
 .wrap  a.jstm-text-color {
 color:var(--text-color-white) !important;
 }
+
+
+.text-3xl {
+    font-size: var(--text-3xl) !important;
+    line-height: var(--tw-leading, var(--text-3xl--line-height)) !important;
+}

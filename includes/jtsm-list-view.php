@@ -228,22 +228,22 @@ class JTSM_Solar_Management_List_View {
                 </div>
                 <!-- Totals Display -->
                 <?php if ($filter === 'all'): ?>
-                    <div class="bg-white p-4 rounded-lg shadow-md flex items-center justify-center">
+                    <div class="bg-pink-100 p-4 rounded-lg shadow-md flex items-center justify-center">
                         <div class="text-center">
-                            <p class="text-sm font-medium text-gray-500 uppercase">Total Seller Amount</p>
-                            <p class="mt-1 text-3xl font-semibold text-gray-900"><?php echo number_format($total_seller_amount, 2); ?></p>
+                            <p class="text-sm font-medium text-pink-800 uppercase">Total Seller Amount</p>
+                            <p class="mt-1 text-3xl font-semibold text-pink-800"><?php echo number_format($total_seller_amount, 2); ?></p>
                         </div>
                     </div>
-                    <div class="bg-white p-4 rounded-lg shadow-md flex items-center justify-center">
+                    <div class="bg-blue-100 p-4 rounded-lg shadow-md flex items-center justify-center">
                         <div class="text-center">
-                            <p class="text-sm font-medium text-gray-500 uppercase">Total Expender Amount</p>
-                            <p class="mt-1 text-3xl font-semibold text-gray-900"><?php echo number_format($total_expender_amount, 2); ?></p>
+                            <p class="text-sm font-medium text-blue-800 uppercase">Total Expender Amount</p>
+                            <p class="mt-1 text-3xl font-semibold text-blue-800"><?php echo number_format($total_expender_amount, 2); ?></p>
                         </div>
                     </div>
-                    <div class="bg-white p-4 rounded-lg shadow-md flex items-center justify-center">
+                    <div class="bg-green-100 p-4 rounded-lg shadow-md flex items-center justify-center">
                         <div class="text-center">
-                            <p class="text-sm font-medium text-gray-500 uppercase">Total Consumer Amount</p>
-                            <p class="mt-1 text-3xl font-semibold text-gray-900"><?php echo number_format($total_consumer_amount, 2); ?></p>
+                            <p class="text-sm font-medium text-green-800 uppercase">Total Consumer Amount</p>
+                            <p class="mt-1 text-3xl font-semibold text-green-800"><?php echo number_format($total_consumer_amount, 2); ?></p>
                         </div>
                     </div>
                 <?php else: ?>

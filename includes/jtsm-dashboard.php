@@ -41,42 +41,51 @@ class JTSM_Solar_Management_Dashboard {
         <div class="wrap bg-gray-100 p-6">
             <h1 class="text-2xl font-semibold text-gray-800 mb-4"><?php _e('Dashboard', 'jtsm'); ?></h1>
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                <div class="bg-white p-4 rounded-lg shadow-md flex items-center justify-center">
+
+             <div class="bg-indigo-500 p-4 rounded-lg shadow-md flex items-center justify-center">
                     <div class="text-center">
-                        <p class="text-sm font-medium text-gray-500 uppercase"><?php _e('Total Seller Amount', 'jtsm'); ?></p>
-                        <p class="mt-1 text-3xl font-semibold text-gray-900"><?php echo number_format( floatval( $total_seller_amount ), 2 ); ?></p>
+                        <p class="text-sm font-medium text-white uppercase"><?php _e('Total Profit', 'jtsm'); ?></p>
+                        <p class="mt-1 text-3xl font-semibold text-white"><?php echo number_format( $total_profit, 2 ); ?></p>
                     </div>
                 </div>
-                <div class="bg-white p-4 rounded-lg shadow-md flex items-center justify-center">
+
+                    <div class="bg-indigo-300 p-4 rounded-lg shadow-md flex items-center justify-center">
                     <div class="text-center">
-                        <p class="text-sm font-medium text-gray-500 uppercase"><?php _e('Total Expender Amount', 'jtsm'); ?></p>
-                        <p class="mt-1 text-3xl font-semibold text-gray-900"><?php echo number_format( floatval( $total_expender_amount ), 2 ); ?></p>
-                    </div>
-                </div>
-                <div class="bg-white p-4 rounded-lg shadow-md flex items-center justify-center">
-                    <div class="text-center">
-                        <p class="text-sm font-medium text-gray-500 uppercase"><?php _e('Total Consumer Amount', 'jtsm'); ?></p>
-                        <p class="mt-1 text-3xl font-semibold text-gray-900"><?php echo number_format( floatval( $total_consumer_amount ), 2 ); ?></p>
-                    </div>
-                </div>
-                <div class="bg-white p-4 rounded-lg shadow-md flex items-center justify-center">
-                    <div class="text-center">
-                        <p class="text-sm font-medium text-gray-500 uppercase"><?php _e('Total Proposal Amount', 'jtsm'); ?></p>
+                        <p class="text-sm font-medium text-black uppercase"><?php _e('Total Proposal Amount', 'jtsm'); ?></p>
                         <p class="mt-1 text-3xl font-semibold text-gray-900"><?php echo number_format( floatval( $total_proposal_amount ), 2 ); ?></p>
                     </div>
                 </div>
-                <div class="bg-white p-4 rounded-lg shadow-md flex items-center justify-center">
+
+
+                 <div class="bg-green-600 p-4 rounded-lg shadow-md flex items-center justify-center">
                     <div class="text-center">
-                        <p class="text-sm font-medium text-gray-500 uppercase"><?php _e('Total Profit', 'jtsm'); ?></p>
-                        <p class="mt-1 text-3xl font-semibold text-gray-900"><?php echo number_format( $total_profit, 2 ); ?></p>
+                        <p class="text-sm font-medium text-white uppercase"><?php _e('Total Consumer Paid Remaining', 'jtsm'); ?></p>
+                        <p class="mt-1 text-3xl font-semibold text-white"><?php echo number_format( $total_remaining, 2 ); ?></p>
                     </div>
                 </div>
-                <div class="bg-white p-4 rounded-lg shadow-md flex items-center justify-center">
+
+
+                <div class="bg-pink-100 p-4 rounded-lg shadow-md flex items-center justify-center">
                     <div class="text-center">
-                        <p class="text-sm font-medium text-gray-500 uppercase"><?php _e('Total Consumer Paid Remaining', 'jtsm'); ?></p>
-                        <p class="mt-1 text-3xl font-semibold text-gray-900"><?php echo number_format( $total_remaining, 2 ); ?></p>
+                        <p class="text-sm font-medium text-pink-800 uppercase"><?php _e('Total Seller Amount', 'jtsm'); ?></p>
+                        <p class="mt-1 text-3xl font-semibold text-pink-800"><?php echo number_format( floatval( $total_seller_amount ), 2 ); ?></p>
                     </div>
                 </div>
+                <div class="bg-blue-100 p-4 rounded-lg shadow-md flex items-center justify-center">
+                    <div class="text-center">
+                        <p class="text-sm font-medium text-blue-800 uppercase"><?php _e('Total Expender Amount', 'jtsm'); ?></p>
+                        <p class="mt-1 text-3xl font-semibold text-blue-800"><?php echo number_format( floatval( $total_expender_amount ), 2 ); ?></p>
+                    </div>
+                </div>
+                <div class="bg-green-100 p-4 rounded-lg shadow-md flex items-center justify-center">
+                    <div class="text-center">
+                        <p class="text-sm font-medium text-green-800 uppercase"><?php _e('Total Consumer Amount', 'jtsm'); ?></p>
+                        <p class="mt-1 text-3xl font-semibold text-green-800"><?php echo number_format( floatval( $total_consumer_amount ), 2 ); ?></p>
+                    </div>
+                </div>
+            
+               
+               
             </div>
         </div>
         <?php
