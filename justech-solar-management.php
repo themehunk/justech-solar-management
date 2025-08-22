@@ -29,6 +29,7 @@ define( 'JTSM_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
 require_once JTSM_PLUGIN_DIR . 'includes/jtsm-crud.php';
 require_once JTSM_PLUGIN_DIR . 'includes/jtsm-list-view.php';
 require_once JTSM_PLUGIN_DIR . 'includes/view-client-detail.php';
+require_once JTSM_PLUGIN_DIR . 'includes/jtsm-dashboard.php';
 
 require_once JTSM_PLUGIN_DIR . 'includes/jtsm-setup.php';
 

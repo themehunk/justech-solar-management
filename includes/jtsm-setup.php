@@ -120,6 +120,7 @@ final class JTSM_Solar_Management_Setup {
      */
     public function jtsm_admin_menu() {
         add_menu_page('Solar Management', 'Solar Management', 'manage_options', 'jtsm-main-menu', [ JTSM_Solar_Management_List_View::instance(), 'jtsm_render_client_list_page' ], 'dashicons-solar-panel', 20);
+       add_submenu_page('jtsm-main-menu', 'Dashboard', 'Dashboard', 'manage_options', 'jtsm-dashboard', [ JTSM_Solar_Management_Dashboard::instance(), 'jtsm_render_dashboard_page' ]);
        add_submenu_page('jtsm-main-menu', 'All Clients', 'All Clients', 'manage_options', 'jtsm-main-menu',  [JTSM_Solar_Management_List_View::instance(),'jtsm_render_client_list_page' ]);
        add_submenu_page('jtsm-main-menu', 'Add New Client', 'Add New Client', 'manage_options', 'jtsm-add-client',   [JTSM_Solar_Management_CRUD::instance(),'jtsm_render_add_client_page' ]);
        add_submenu_page('jtsm-main-menu', 'All Payments', 'All Payments', 'manage_options', 'jtsm-all-payments',  [JTSM_Solar_Management_List_View::instance(),'jtsm_render_payment_list_page' ]);
