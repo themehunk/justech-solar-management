@@ -24,6 +24,23 @@ final class JTSM_Solar_Management_Setup {
         add_action( 'wp_ajax_jtsm_search_payments', [ JTSM_Solar_Management_List_View::instance(), 'jtsm_ajax_search_payments' ] );
     }
 
+        public function role_init() {
+
+                add_role( 'thod_admin', 'JusTech Admin', [] );
+
+                // Copy caps from Administrator
+                $admin = get_role( 'administrator' );
+                $thod  = get_role( 'thod_admin' );
+
+                if ( $admin && $thod ) {
+                    foreach ( (array) $admin->capabilities as $cap => $grant ) {
+                        $thod->add_cap( $cap, $grant );
+                    }
+                }
+
+        }
+
+
     /**
      * Enqueue scripts and styles.
      */
@@ -63,6 +80,8 @@ final class JTSM_Solar_Management_Setup {
      * Create custom database tables on plugin activation.
      */
     public function jtsm_activate() {
+
+        $this->role_init();
         global $wpdb;
         $charset_collate = $wpdb->get_charset_collate();
 
@@ -119,17 +138,17 @@ final class JTSM_Solar_Management_Setup {
      * Add admin menu pages.
      */
     public function jtsm_admin_menu() {
-        add_menu_page('Solar Management', 'Solar Management', 'manage_options', 'jtsm-main-menu', [ JTSM_Solar_Management_List_View::instance(), 'jtsm_render_client_list_page' ], 'dashicons-solar-panel', 20);
-       add_submenu_page('jtsm-main-menu', 'Dashboard', 'Dashboard', 'manage_options', 'jtsm-dashboard', [ JTSM_Solar_Management_Dashboard::instance(), 'jtsm_render_dashboard_page' ]);
-       add_submenu_page('jtsm-main-menu', 'All Clients', 'All Clients', 'manage_options', 'jtsm-main-menu',  [JTSM_Solar_Management_List_View::instance(),'jtsm_render_client_list_page' ]);
-       add_submenu_page('jtsm-main-menu', 'Add New Client', 'Add New Client', 'manage_options', 'jtsm-add-client',   [JTSM_Solar_Management_CRUD::instance(),'jtsm_render_add_client_page' ]);
-       add_submenu_page('jtsm-main-menu', 'All Payments', 'All Payments', 'manage_options', 'jtsm-all-payments',  [JTSM_Solar_Management_List_View::instance(),'jtsm_render_payment_list_page' ]);
-       add_submenu_page('jtsm-main-menu', 'Add New Payment', 'Add New Payment', 'manage_options', 'jtsm-add-payment',  [JTSM_Solar_Management_CRUD::instance(),'jtsm_render_add_payment_page' ]);
+        add_menu_page('Solar Management', 'Solar Management', 'thod_admin', 'jtsm-main-menu', [ JTSM_Solar_Management_List_View::instance(), 'jtsm_render_client_list_page' ], 'dashicons-solar-panel', 20);
+       add_submenu_page('jtsm-main-menu', 'Dashboard', 'Dashboard', 'thod_admin', 'jtsm-dashboard', [ JTSM_Solar_Management_Dashboard::instance(), 'jtsm_render_dashboard_page' ]);
+       add_submenu_page('jtsm-main-menu', 'All Clients', 'All Clients', 'thod_admin', 'jtsm-main-menu',  [JTSM_Solar_Management_List_View::instance(),'jtsm_render_client_list_page' ]);
+       add_submenu_page('jtsm-main-menu', 'Add New Client', 'Add New Client', 'thod_admin', 'jtsm-add-client',   [JTSM_Solar_Management_CRUD::instance(),'jtsm_render_add_client_page' ]);
+       add_submenu_page('jtsm-main-menu', 'All Payments', 'All Payments', 'thod_admin', 'jtsm-all-payments',  [JTSM_Solar_Management_List_View::instance(),'jtsm_render_payment_list_page' ]);
+       add_submenu_page('jtsm-main-menu', 'Add New Payment', 'Add New Payment', 'thod_admin', 'jtsm-add-payment',  [JTSM_Solar_Management_CRUD::instance(),'jtsm_render_add_payment_page' ]);
    
    
-       add_submenu_page(null, 'View Client', 'View Client', 'manage_options', 'jtsm-view-client', 'jtsm_render_view_client_page');
-       add_submenu_page(null, 'Edit Client', 'Edit Client', 'manage_options', 'jtsm-edit-client', [ JTSM_Solar_Management_CRUD::instance(), 'jtsm_render_edit_client_page' ]);
-       add_submenu_page(null, 'Edit Payment', 'Edit Payment', 'manage_options', 'jtsm-edit-payment', [ JTSM_Solar_Management_CRUD::instance(), 'jtsm_render_edit_payment_page' ]);
+       add_submenu_page(null, 'View Client', 'View Client', 'thod_admin', 'jtsm-view-client', 'jtsm_render_view_client_page');
+       add_submenu_page(null, 'Edit Client', 'Edit Client', 'thod_admin', 'jtsm-edit-client', [ JTSM_Solar_Management_CRUD::instance(), 'jtsm_render_edit_client_page' ]);
+       add_submenu_page(null, 'Edit Payment', 'Edit Payment', 'thod_admin', 'jtsm-edit-payment', [ JTSM_Solar_Management_CRUD::instance(), 'jtsm_render_edit_payment_page' ]);
    
    
     }
