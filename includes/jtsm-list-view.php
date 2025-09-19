@@ -57,6 +57,10 @@ class JTSM_Solar_Management_List_View {
         $sql_clients .= " ORDER BY created_at DESC";
 
         $clients = $wpdb->get_results( $sql_clients );
+
+              
+
+
         ?>
         <div class="wrap bg-gray-100 p-6">
             <div class="flex items-center justify-between mb-4">
@@ -99,8 +103,14 @@ class JTSM_Solar_Management_List_View {
                             $view_link = admin_url('admin.php?page=jtsm-view-client&client_id=' . $client->id);
                             $edit_link = admin_url('admin.php?page=jtsm-edit-client&client_id=' . $client->id);
                             $delete_link = wp_nonce_url(admin_url('admin.php?page=jtsm-main-menu&action=delete_client&client_id=' . $client->id), 'jtsm_delete_client_' . $client->id);
-                  ?>
-                        <tr>
+                         
+                             $proposal_amount = number_format(floatval($client->proposal_amount), 2);  
+                              $total_amount = $this->total_payment_clients($clients_table,$client->id); 
+                
+                              $completed = ($proposal_amount <= $total_amount) ?'#fffdeb':'#fef6f4';
+                            $consumeBG = ($filter === 'consumer')?'background:'.$completed.';':'';
+                        ?>
+                        <tr style="<?php echo $consumeBG; ?>">
                             <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                                 <a href="<?php echo esc_url($view_link); ?>" class="text-indigo-600 hover:text-indigo-900"><?php echo esc_html($client->first_name . ' ' . $client->last_name); ?></a>
                             </td>
@@ -117,8 +127,8 @@ class JTSM_Solar_Management_List_View {
                                 ?>
                                 <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full <?php echo $badge; ?>"><?php echo ucfirst(esc_html($client->user_type)); ?></span>
                             </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500"><?php echo number_format(floatval($client->proposal_amount), 2); ?></td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500"><?php echo $this->total_payment_clients($clients_table,$client->id); ?></td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500"><?php echo $proposal_amount; ?></td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500"><?php echo $total_amount; ?></td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500"><?php echo esc_html( date_i18n( get_option('date_format'), strtotime($client->created_at) ) ); ?></td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                                 <a href="<?php echo esc_url($view_link); ?>" class="text-gray-600 hover:text-indigo-900">View</a> |
